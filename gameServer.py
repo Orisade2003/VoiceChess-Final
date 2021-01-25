@@ -178,6 +178,7 @@ def make_connection(con, game_num, isSpec = False):
 
 
 
+
                 break
 
 
