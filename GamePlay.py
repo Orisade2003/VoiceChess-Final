@@ -305,7 +305,7 @@ def connect():
 
 
 
-def game_event_handler(color):
+"""def game_event_handler(color):
     while game_running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT and color !="s":
@@ -337,11 +337,10 @@ def game_event_handler(color):
                 if color == cBoard.turn and cBoard.is_full:
                     mouse_pos = pygame.mouse.get_pos()
                     n.send("update moves")
-                    r, c = select(mouse_pos)
+                    r, c = select(mouse_pos, color)
                     n.send("select " + str(r) + " " + str(c) + " " + color)
         time.sleep(0.1)
-
-
+"""
 def event_handler(color):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
