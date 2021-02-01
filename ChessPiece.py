@@ -60,18 +60,24 @@ class Piece:
             print(traceback.print_exc())
 
 
-    def draw(self,win,color):
+    def draw(self,win,color, player="w"):
         if self.color =="w":
             this = White_Pieces[self.img]
         else:
             this = Black_Pieces[self.img]
 
-        x = (4 - self.col) + round(self.startX + (self.col * self.rect[2] / 8)) #make sure i understand this part
-        y = 3 + round(self.startY + (self.row * self.rect[3] / 8))#make sure i understamd this part
+        if player == "b":
+            newcol = 7 - self.col
+            newrow = 7 - self.row
+        else:
+            newcol = self.col
+            newrow = self.row
+
+        x = (4 - newcol) + round(self.startX + (newcol * self.rect[2] / 8)) #make sure i understand this part
+        y = 3 + round(self.startY + (newrow * self.rect[3] / 8))#make sure i understamd this part
 
         if self.is_selected and self.color == color:
             pygame.draw.rect(win, (255, 0, 0), (x, y, 62, 62), 4)
-            print(x,y , "fdfdfdfdfdfddamni")
 
         win.blit(this,(x,y))
 

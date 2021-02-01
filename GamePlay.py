@@ -10,8 +10,8 @@ game_running = True
 width = 750
 height = 750
 name = input("Please type your name: ")
-#wind = pygame.display.set_mode((width, height))
-wind = DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+wind = pygame.display.set_mode((width, height))
+#wind = DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 def install(package):
     subprocess.call([sys.executable, "-m", "pip", "install", package])
 
@@ -194,7 +194,7 @@ def menu(wind, name):
 
 def draw_game_window(wind, cBoard, p1, p2, color, isReady):
     wind.blit(board, (0,0))
-    cBoard.draw(wind, color)
+    cBoard.draw(wind, color,color)
 
 
     formatTime1 = str(int(p1 // 60)) + ":" + str(int(p1 % 60))

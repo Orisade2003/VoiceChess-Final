@@ -85,11 +85,15 @@ class Board:
 
 
 
-    def draw(self, win, color):
+    def draw(self, win, color, player="w"):
         z=()
         if self.last and color == self.turn:
-            y,x =self.last[0]
-            y1, x1 = self.last[1]
+            if player == "w":
+                y,x =self.last[0]
+                y1, x1 = self.last[1]
+            else:
+                y, x = (7 - self.last[0][0] , 7 - self.last[0][1])
+                y1, x1 = (7 - self.last[1][0], 7 - self.last[1][1])
             # do'nt really understand this part
             xx = (4 - x) + round(self.startX + (x * self.rect[2] / 8))
             yy = 3 + round(self.startY + (y * self.rect[3] / 8))
@@ -104,7 +108,7 @@ class Board:
             for c in range(self.cols):
                 p = self.board[r][c]
                 if type(p) != int:
-                    p.draw(win, color)
+                    p.draw(win, color, player)
                     if self.board[r][c].is_selected:
                         t = (r, c)
 
