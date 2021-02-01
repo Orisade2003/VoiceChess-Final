@@ -279,7 +279,7 @@ def end_screen(wind, txt):
     exit(0)
 
 """this fuction will return a position on the board"""
-def select(pos):
+def select(pos, player="w"):
      y = pos[1]
      x = pos[0]
 
@@ -290,7 +290,8 @@ def select(pos):
 
              i = int(xx/ (rect[2] / 8))
              j = int(yy / (rect[3] / 8))
-
+             if player == "b":
+                 return (7-i, 7-j)
              return (i, j)
      else:
          return (-1,-1)
@@ -369,7 +370,7 @@ def event_handler(color):
             if color == cBoard.turn and cBoard.is_full:
                 mouse_pos = pygame.mouse.get_pos()
                 n.send("update moves")
-                r, c = select(mouse_pos)
+                r, c = select(mouse_pos, color)
                 n.send("select " + str(r) + " " + str(c) + " " + color)
 
 
