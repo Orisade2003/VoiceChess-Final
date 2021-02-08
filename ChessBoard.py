@@ -1,6 +1,7 @@
 import pygame
 import os
 import time
+from copy import deepcopy
 from ChessPiece import Bishop
 from ChessPiece import King
 from ChessPiece import Rook
@@ -221,6 +222,7 @@ class Board:
         print("Trying to move to : ", end)
         changed = True
         nBoard = self.board[:]
+
         if nBoard[start[0]][start[1]].is_pawn:
             nBoard[start[0]][start[1]].is_first = False
 
@@ -232,13 +234,14 @@ class Board:
         if self.checked(color) or (checkedBefore and self.checked(color)):
             changed = False
             nBoard = self.board[:]
-            if nBoard[end[0]][end[1]].is_pawn:
-                nBoard[end[0]][end[1]].is_first = True
+            if not type(nBoard[end[0]][end[1]]) == int:
+                if nBoard[end[0]][end[1]].is_pawn:
+                    nBoard[end[0]][end[1]].is_first = True
 
-            nBoard[end[0]][end[1]].move_to_pos((start[0], start[1]))
-            nBoard[start[0]][start[1]] = nBoard[end[0]][end[1]]
-            nBoard[end[0]][end[1]] = 0
-            self.board = nBoard
+                nBoard[end[0]][end[1]].move_to_pos((start[0], start[1]))
+                nBoard[start[0]][start[1]] = nBoard[end[0]][end[1]]
+                nBoard[end[0]][end[1]] = 0
+                self.board = nBoard
         else:
             self.resetSelect()
 
@@ -252,6 +255,38 @@ class Board:
             self.startTime = time.time()
 
         return changed
+
+
+    def checkmate3(self,color):
+        if not self.checked(color):
+            return False
+    
+        new_board = deepcopy(self.board)
+        boardlist = new_board.board
+        print(boardlist)
+        for row in range(len(boardlist)):
+            for col in range(len(boardlist[row])):
+                if type(boardlist[row][col]) == int:
+                    continue
+                if not boardlist[row][col].color == color:
+                    continue
+                    
+                p = boardlist[row][col]
+                all_moves = p.get_valid_moves(boardlist)
+
+                for t in all_moves:
+                    if new_board.move((row,col),t,color):
+                        return False
+        return True
+        
+        
+
+
+
+
+
+
+
 
 
 
