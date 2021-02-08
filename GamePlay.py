@@ -77,7 +77,7 @@ class VCClient:
     def __init__(self, port):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.target_ip = "10.100.102.6"
+            self.target_ip = "localhost"
             self.target_port = int(port)
             self.voicechat_running = True
             print(self.target_port)
