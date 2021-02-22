@@ -17,7 +17,7 @@ class Board:
     rect = (113, 113, 525, 525)
     startX = rect[0]
     startY = rect[1]
-
+    f=[]
     def __init__(self, rows, cols):
         rows, cols = (8, 8)
         self.board = [[0] * cols] * rows
@@ -120,20 +120,24 @@ class Board:
             for c in range(self.cols):
                 if self.board[r][c] != 0:
                     if self.board[r][c].color != color:
-                        for move in self.board[r][c].moves:
+                        for move in self.board[r][c].moves:# was .moves before
                             kills.append(move)
         return kills
+
+
 
     def checked(self, color):
         self.get_all_moves()
         kills = self.get_kills(color)
-        king_pos = (9,9)
+        king_pos = (9, 9)
         for r in range(self.rows):
             for c in range(self.cols):
                 if self.board[r][c] != 0:
-                    if self.board[r][c].is_king and self.board[r][c].color == color:
-                        king_pos = (c,r)
+                    if type(self.board[r][c]) is King and self.board[r][c].color == color:
+                        king_pos = (c, r)#was c,r
         if king_pos in kills:
+            print("point of no return", king_pos)
+            self.f.append(king_pos)
             return True
         return False
 
@@ -151,13 +155,14 @@ class Board:
 
     def checkmate(self, color):
         flag = False
+
         if self.checked(color):
             king = None
             for r in range(self.rows):
                 for c in range(self.cols):
                     if self.board[r][c] != 0:
                         box = self.board[r][c]
-                        if box.is_king and box.color == color:
+                        if type(box) is King and box.color == color:
                             king = box
             if king != None:
                 moves = king.get_valid_moves(board=self.board)
@@ -218,29 +223,33 @@ class Board:
 
 
     def move(self, start, end, color):
+        
         checkedBefore = self.checked(color)
         print("Trying to move to : ", end)
+
         changed = True
         nBoard = self.board[:]
-
+        
         if nBoard[start[0]][start[1]].is_pawn:
+            isfirst = nBoard[start[0]][start[1]].is_first
             nBoard[start[0]][start[1]].is_first = False
 
+        original_piece = nBoard[end[0]][end[1]]
         nBoard[start[0]][start[1]].move_to_pos((end[0], end[1]))
         nBoard[end[0]][end[1]] = nBoard[start[0]][start[1]]
         nBoard[start[0]][start[1]] = 0
         self.board = nBoard
-
+        
         if self.checked(color) or (checkedBefore and self.checked(color)):
             changed = False
             nBoard = self.board[:]
             if not type(nBoard[end[0]][end[1]]) == int:
                 if nBoard[end[0]][end[1]].is_pawn:
-                    nBoard[end[0]][end[1]].is_first = True
+                    nBoard[end[0]][end[1]].is_first = isfirst
 
                 nBoard[end[0]][end[1]].move_to_pos((start[0], start[1]))
                 nBoard[start[0]][start[1]] = nBoard[end[0]][end[1]]
-                nBoard[end[0]][end[1]] = 0
+                nBoard[end[0]][end[1]] = original_piece
                 self.board = nBoard
         else:
             self.resetSelect()
@@ -258,24 +267,28 @@ class Board:
 
 
     def checkmate3(self,color):
+        self.f = []
         if not self.checked(color):
             return False
     
-        new_board = deepcopy(self.board)
+        new_board = deepcopy(self)
         boardlist = new_board.board
         print(boardlist)
-        for row in range(len(boardlist)):
-            for col in range(len(boardlist[row])):
-                if type(boardlist[row][col]) == int:
+        for col in range(len(boardlist)):
+            for row in range(len(boardlist[col])):
+                if type(boardlist[col][row]) == int:
                     continue
-                if not boardlist[row][col].color == color:
+                if not boardlist[col][row].color == color:
                     continue
                     
-                p = boardlist[row][col]
+                p = boardlist[col][row]
                 all_moves = p.get_valid_moves(boardlist)
 
                 for t in all_moves:
-                    if new_board.move((row,col),t,color):
+                    if new_board.move((col, row), (t[1],t[0]), color):
+                        print("this is where the checkm happens", t, type(p), p.color,(col,row))
+                        print(p.moves)
+
                         return False
         return True
         
@@ -351,10 +364,19 @@ class Board:
 
         if has_moved:
             if self.turn == "b":
-               self.turn = "w"
-               self.resetSelect()
+                if self.checkmate3("w"):
+                    self.winner = "b"
+
+                self.turn = "w"
+
+                self.resetSelect()
+
+
             else:
+                if self.checkmate3("b"):
+                    self.winner = "w"
                 self.turn = "b"
+
                 self.resetSelect()
         print("the piece selected is :     ",previous, col, row)
         print("previous : ", previous)

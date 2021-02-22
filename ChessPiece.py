@@ -219,7 +219,7 @@ class King(Piece):
             if p == 0:
                 add_moves.append((c,r+1))
             elif p.color != self.color:
-                add_moves.append(c, r + 1)
+                add_moves.append((c, r + 1))
 
         #bottom right
             if c<7:
@@ -233,8 +233,8 @@ class King(Piece):
             p = board[r][c-1]
             if p==0:
                 add_moves.append((c-1,r-1))
-            elif p.color!=self.color:
-                add_moves.append((c - 1, r - 1))
+            elif p.color != self.color:
+                add_moves.append((c - 1, r ))
 
         #middle right
         if c<7:
@@ -417,12 +417,14 @@ class Queen(Piece):
                      add_moves.append((above_col, box))
                      break
                  else:
-                     above_col = 9
+                     break
              above_col += 1
+         bottom_col = c - 1
+         above_col = c + 1
 
 
          for box in range(r - 1, -1, -1):
-             if bottom_col < 8:
+             if bottom_col > -1:
                  p=board[box][bottom_col]
                  if p == 0:
                      add_moves.append((bottom_col,box))
@@ -430,7 +432,7 @@ class Queen(Piece):
                      add_moves.append((bottom_col,box))
                      break
                  else:
-                     bottom_col = -1
+                     break
              bottom_col -= 1
 
          bottom_col = c - 1
@@ -447,7 +449,8 @@ class Queen(Piece):
                  else:
                      above_col = 8
              above_col += 1
-
+         bottom_col = c - 1
+         above_col = c + 1
 
          for box in range(r+1, 8):
              if bottom_col > -1:
@@ -458,8 +461,14 @@ class Queen(Piece):
                      add_moves.append((bottom_col,box))
                      break
                  else:
-                     bottom_col = -1
-             bottom_col = -1
+                     break
+             bottom_col -= 1
+
+
+             #changed here
+             bottom_col -=1
+         bottom_col = c - 1
+         above_col = c + 1
 
          # going up
          for box in range(r-1 ,-1 ,-1):

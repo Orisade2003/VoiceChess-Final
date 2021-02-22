@@ -341,6 +341,15 @@ def connect():
                     n.send("select " + str(r) + " " + str(c) + " " + color)
         time.sleep(0.1)
 """
+
+def get_empty(board):
+    for r in range(8):
+        for c in range(8):
+            if board[r][c] == 0:
+                return (r,c)
+
+
+
 def event_handler(color):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -369,8 +378,12 @@ def event_handler(color):
             if color == cBoard.turn and cBoard.is_full:
                 mouse_pos = pygame.mouse.get_pos()
                 n.send("update moves")
+
                 r, c = select(mouse_pos, color)
+                #if not r not in range(8) or c not in range(8):
+                 #   r,c = get_empty(cBoard.board)
                 n.send("select " + str(r) + " " + str(c) + " " + color)
+
 
 
 data = None
@@ -382,7 +395,7 @@ def main_logic():
     voicechat_port = n.send("vcport")
 #    print(n.server)
 
-    vcclient = VCClient(voicechat_port)
+    #vcclient = VCClient(voicechat_port) add back
     cBoard = n.send("update_moves")  # if doesnt work: try without the underscore
 
     cBoard = n.send("name " + name)
@@ -423,12 +436,7 @@ def main_logic():
                 cBoard = n.send("w won")
                 break
 
-        if cBoard.checkmate("w"):
-            cBoard = n.send("b won")
-            break
-        elif cBoard.checkmate("b"):
-            cBoard = n.send("w won")
-            break
+
 
         ct += 1
         if ct % 5 == 0 and n:

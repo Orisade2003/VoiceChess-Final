@@ -347,7 +347,10 @@ conn_list =[]
 temp = []
 uid_counter = 0
 FIRST_VC_PORT= 8081
-VCSERVER_LIST = [VCServer(port) for port in range(FIRST_VC_PORT,FIRST_VC_PORT + MAX_ROOMS )]
+try:
+    VCSERVER_LIST = [VCServer(port) for port in range(FIRST_VC_PORT,FIRST_VC_PORT + MAX_ROOMS )]
+except:
+    print(traceback.print_exc())
 
 #start_new_thread(VCServer, (8081,))
 while True:
