@@ -27,6 +27,7 @@ class Board:
         self.winner=None
         self.last = None
         self.copy = True
+        self.piece_selected = False
         self.rows = rows
         self.cols = cols
         self.board = [[0 for x in range(8)] for y in range(rows)]
@@ -149,6 +150,8 @@ class Board:
             for c in range(self.cols):
                 if self.board[r][c] != 0:
                     self.board[r][c].is_selected = False
+        self.piece_selected = False
+
 
 
 

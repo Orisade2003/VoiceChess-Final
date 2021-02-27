@@ -57,6 +57,7 @@ vcclient = None
 n = None
 
 
+
 def clean_up():
     global game_running, vcclient, n
     print("starting clean up")
@@ -349,8 +350,10 @@ def get_empty(board):
                 return (r,c)
 
 
-
+ctr = 0
+ctr2 = 0
 def event_handler(color):
+    global ctr,ctr2
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             if color == "w":
@@ -380,9 +383,34 @@ def event_handler(color):
                 n.send("update moves")
 
                 r, c = select(mouse_pos, color)
+                print("is piece selected?", cBoard.piece_selected)
+                if not cBoard.piece_selected:
+                    print("piece selected/ ", cBoard.piece_selected)
+                    if cBoard.board[c][r] != 0 and cBoard.board[c][r].color == color:
+                        cBoard.piece_selected = True
+                        n.send("select " + str(r) + " " + str(c) + " " + color)
+                        print("sent")
+                        print("piece selected2 is", cBoard.piece_selected)
+                        n.send("piece")
+                        ctr += 1
+                elif ctr >0:
+                    n.send("select " + str(r) + " " + str(c) + " " + color)
+                    print("sent here")
+
+                    #ctr2+=1
+                    #ctr = 0
+                    #ctr2 = 0
+
+                    if cBoard.board[c][r] == 0 or (not type(cBoard.board[c][r]) == int and cBoard.board[c][r].color != color ):
+                        n.send("has played")
+                        ctr = 0
+
+
+
+
                 #if not r not in range(8) or c not in range(8):
                  #   r,c = get_empty(cBoard.board)
-                n.send("select " + str(r) + " " + str(c) + " " + color)
+
 
 
 

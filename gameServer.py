@@ -88,8 +88,8 @@ def make_connection(con, game_num, isSpec = False):
                         row = int(data[2])
                         color = data[3]
                         cBoard.piece_select(col, row, color)
-                        print(col,row,color)
-                        print(cBoard.board)
+                        #print(col,row,color)
+                        #print(cBoard.board)
                     if info == "b won":
                         cBoard.winner = "b"
                         print("black won")
@@ -115,7 +115,11 @@ def make_connection(con, game_num, isSpec = False):
                         except Exception as e:
                             print(e)
                             print(traceback.print_exc())
+                    if info == "piece":
+                        cBoard.piece_selected = True
 
+                    if info == "has played":
+                        cBoard.piece_selected = False
 
                     if cBoard.is_full:
                         if cBoard.turn == "w":
