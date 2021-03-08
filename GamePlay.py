@@ -289,11 +289,11 @@ def select(pos, player="w"):
              xx = x-rect[0]
              yy = y -rect[1]
 
-             i = int(xx/ (rect[2] / 8))
-             j = int(yy / (rect[3] / 8))
+             c = int(xx/ (rect[2] / 8))
+             r = int(yy / (rect[3] / 8))
              if player == "b":
-                 return (7-i, 7-j)
-             return (i, j)
+                 return (7-r, 7-c)
+             return (r, c)
      else:
          return (-1,-1)
      """a (-1,-1) means that the position is not on the chess board"""
@@ -352,8 +352,9 @@ def get_empty(board):
 
 ctr = 0
 ctr2 = 0
+selected = None
 def event_handler(color):
-    global ctr,ctr2
+    global ctr,ctr2, selected
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             if color == "w":
@@ -383,29 +384,51 @@ def event_handler(color):
                 n.send("update moves")
 
                 r, c = select(mouse_pos, color)
-                print("is piece selected?", cBoard.piece_selected)
+                if (cBoard.board[r][c] != 0) and (cBoard.board[r][c].color == color):
+                    selected = cBoard.board[r][c]
+                    print("selcted.row is ", selected.col)
+
+                else:
+                    if selected:
+                        if (c,r) in selected.moves:
+
+                            n.send(f"move_piece {color} {str(selected.row)} {str(selected.col)} {str(r)} {str(c)}")
+                            selected = None
+                            #n.send("select " + str(selected.row) + " " + str(selected.col) + " " + color)
+                            #n.send("select " + str(r) + " " + str(c) + " " + color)
+
+                """print("is piece selected?", cBoard.piece_selected)
                 if not cBoard.piece_selected:
                     print("piece selected/ ", cBoard.piece_selected)
                     if cBoard.board[c][r] != 0 and cBoard.board[c][r].color == color:
-                        cBoard.piece_selected = True
+                        
+                        cBoard.piece_selected = cBoard.board[c][r]
                         n.send("select " + str(r) + " " + str(c) + " " + color)
                         print("sent")
                         print("piece selected2 is", cBoard.piece_selected)
                         n.send("piece")
                         ctr += 1
                 elif ctr >0:
-                    n.send("select " + str(r) + " " + str(c) + " " + color)
                     print("sent here")
-
                     #ctr2+=1
                     #ctr = 0
                     #ctr2 = 0
 
-                    if cBoard.board[c][r] == 0 or (not type(cBoard.board[c][r]) == int and cBoard.board[c][r].color != color ):
-                        n.send("has played")
-                        ctr = 0
+                    in_moves = (c,r) in cBoard.piece_selected.moves
+                    if (in_moves) or ( cBoard.board[c][r] != 0 and cBoard.board[c][r].color == color):
+                        n.send("select " + str(r) + " " + str(c) + " " + color)
+                        if in_moves:
+                            n.send("has played")
+                        else:
+                            n.send("piece")
+                            
 
 
+
+
+                    ctr = 0
+
+"""
 
 
                 #if not r not in range(8) or c not in range(8):
@@ -423,7 +446,7 @@ def main_logic():
     voicechat_port = n.send("vcport")
 #    print(n.server)
 
-    #vcclient = VCClient(voicechat_port) add back
+    vcclient = VCClient(voicechat_port)
     cBoard = n.send("update_moves")  # if doesnt work: try without the underscore
 
     cBoard = n.send("name " + name)

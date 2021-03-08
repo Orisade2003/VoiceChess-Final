@@ -21,7 +21,9 @@ except Exception as e:
 
 s.listen()
 print("Server in now online, and waiting for a client connection")
-
+col1 = 0
+row1 = 0
+prev_piece = None
 
 room_dict = {0:Board(8, 8)}
 
@@ -41,7 +43,7 @@ def make_connection(con, game_num, isSpec = False):
     voicechat_port = "8081"
     vcrequest_flag = False
     name = ""
-    global conn_ctr, room_dict, spec_ctr, pos, currentId, color
+    global conn_ctr, room_dict, spec_ctr, pos, currentId, color, col1, row1, prev_piece
     if isSpec == False:
         name = None
         try:
@@ -81,15 +83,61 @@ def make_connection(con, game_num, isSpec = False):
                 if not check:
                     break
                 else:
+                    if info.count("move_piece") > 0:
+                        data = info.split(" ")
+                        print(data)
+                        color = data[1]
+                        current_row = int(data[2])  # switch to col = int(data[1])
+                        current_col = int(data[3])  # switch to  row = int(data[2])
+
+                        new_row = int(data[4])
+                        new_col = int(data[5])
+
+                        if color != cBoard.turn:
+                            continue
+
+                        start = (current_row, current_col)
+                        end = (new_row, new_col)
+                        print("current row and col:", cBoard.board[current_row][current_col])
+                        if not cBoard.move(start, end, color):
+                            continue
+
+                        opp_color = "b" if color == "w" else "w"
+
+                        if cBoard.checkmate3(opp_color):
+                            cBoard.winner = color
+                        else:
+                            cBoard.turn = opp_color
+
+
+
+
+
+
+
+
+
+
+
                     if info.count("select") > 0:
                         data = info.split(" ")
                         print(data)
-                        col = int(data[1])
-                        row = int(data[2])
+                        col = int(data[1])# switch to col = int(data[1])
+                        row = int(data[2])#switch to  row = int(data[2])
                         color = data[3]
+                        print("this is rowcol", row,col)
                         cBoard.piece_select(col, row, color)
                         #print(col,row,color)
                         #print(cBoard.board)
+                    """if info.count("mark") > 0:
+                        data = info.split(" ")
+                        col = int(data[1])
+                        row = int(data[2])
+                        color = data[3]
+
+                        prev_piece = cBoard.board[row][col]
+
+                        cBoard.board[col][row].is_selected = True"""
                     if info == "b won":
                         cBoard.winner = "b"
                         print("black won")
@@ -116,10 +164,10 @@ def make_connection(con, game_num, isSpec = False):
                             print(e)
                             print(traceback.print_exc())
                     if info == "piece":
-                        cBoard.piece_selected = True
+                        cBoard.piece_selected = cBoard.board[col][row]
 
                     if info == "has played":
-                        cBoard.piece_selected = False
+                        cBoard.piece_selected = None
 
                     if cBoard.is_full:
                         if cBoard.turn == "w":
