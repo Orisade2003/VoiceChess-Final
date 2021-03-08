@@ -1,7 +1,7 @@
 import pygame
 import os
 import traceback
-
+import Globals
 
 b_bishop = pygame.image.load(os.path.join("img", "black_bishop.png"))
 b_king = pygame.image.load(os.path.join("img", "black_king.png"))
@@ -60,7 +60,7 @@ class Piece:
             print(traceback.print_exc())
 
 
-    def draw(self,win,color, player="w"):
+    def draw(self,win,color, player="w", selected=None):
         if self.color =="w":
             this = White_Pieces[self.img]
         else:
@@ -76,7 +76,7 @@ class Piece:
         x = (4 - newcol) + round(self.startX + (newcol * self.rect[2] / 8)) #make sure i understand this part
         y = 3 + round(self.startY + (newrow * self.rect[3] / 8))#make sure i understamd this part
 
-        if self.is_selected and self.color == color:
+        if selected and str(self) == str(selected) and self.color == color:    #self == selected and self.color == color:
             pygame.draw.rect(win, (255, 0, 0), (x, y, 62, 62), 4)
 
         win.blit(this,(x,y))
@@ -99,7 +99,7 @@ class Piece:
             print(traceback.print_exc())
 
     def __str__(self):
-        return str(self.col) + ' ' + str(self.row)
+        return str(self.row) + ' ' + str(self.col)
 
 
 class Bishop(Piece):

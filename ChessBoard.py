@@ -88,7 +88,7 @@ class Board:
 
 
 
-    def draw(self, win, color, player="w"):
+    def draw(self, win, color, player="w", selected=None):
         z=()
         if self.last and color == self.turn:
             if player == "w":
@@ -111,7 +111,7 @@ class Board:
             for c in range(self.cols):
                 p = self.board[r][c]
                 if type(p) != int:
-                    p.draw(win, color, player)
+                    p.draw(win, color, player, selected)
                     if self.board[r][c].is_selected:
                         t = (r, c)
 

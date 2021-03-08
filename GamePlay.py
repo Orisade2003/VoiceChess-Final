@@ -5,6 +5,7 @@ import imp_pip
 import pygame
 import traceback
 from ChessBoard import Board
+import Globals
 #from network import Network
 game_running = True
 width = 750
@@ -195,7 +196,7 @@ def menu(wind, name):
 
 def draw_game_window(wind, cBoard, p1, p2, color, isReady):
     wind.blit(board, (0,0))
-    cBoard.draw(wind, color,color)
+    cBoard.draw(wind, color,color, Globals.selected)
 
 
     formatTime1 = str(int(p1 // 60)) + ":" + str(int(p1 % 60))
@@ -385,15 +386,14 @@ def event_handler(color):
 
                 r, c = select(mouse_pos, color)
                 if (cBoard.board[r][c] != 0) and (cBoard.board[r][c].color == color):
-                    selected = cBoard.board[r][c]
-                    print("selcted.row is ", selected.col)
+                    Globals.selected = cBoard.board[r][c]
 
                 else:
-                    if selected:
-                        if (c,r) in selected.moves:
+                    if Globals.selected:
+                        if (c,r) in Globals.selected.moves:
 
-                            n.send(f"move_piece {color} {str(selected.row)} {str(selected.col)} {str(r)} {str(c)}")
-                            selected = None
+                            n.send(f"move_piece {color} {str(Globals.selected.row)} {str(Globals.selected.col)} {str(r)} {str(c)}")
+                            Globals.selected = None
                             #n.send("select " + str(selected.row) + " " + str(selected.col) + " " + color)
                             #n.send("select " + str(r) + " " + str(c) + " " + color)
 
@@ -446,7 +446,7 @@ def main_logic():
     voicechat_port = n.send("vcport")
 #    print(n.server)
 
-    vcclient = VCClient(voicechat_port)
+    #vcclient = VCClient(voicechat_port) add back
     cBoard = n.send("update_moves")  # if doesnt work: try without the underscore
 
     cBoard = n.send("name " + name)
@@ -516,8 +516,10 @@ def main_logic():
 def main():
     width = 750
     height = 750
+    Globals.init()
     pygame.display.set_caption("Chess Game")
     menu(wind=wind, name=name)
+
 
 
 
