@@ -2,59 +2,76 @@ import subprocess
 import pip
 import sys
 import imp_pip
-import pygame
 import traceback
 from ChessBoard import Board
-#from network import Network
-game_running = True
-width = 750
-height = 750
-name = input("Please type your name: ")
-wind = pygame.display.set_mode((width, height))
-#wind = DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-def install(package):
-    subprocess.call([sys.executable, "-m", "pip", "install", package])
-
-try:
-    print("Trying to install pygame")
-    import pygame
-except:
-    print("Please install pygame if you want to play")
-    try:
-        print("Please wait while we try installing pygame")
-        import pip
-        install("pygame")
-        print("Pygame installed successfully")
-
-    except Exception as e:
-        print("Seems like print ins't installed on the system' trying to install pip")
-        imp_pip.main()
-        print("Pip installed, trying to download pygame")
-    try:
-        import pip
-        install("pygame")
-        print("pygame has been successfully installed")
-    except Exception as e:
-        print(e)
-
+import Globals
+import argparse
 import os
 import pygame
 import pickle
 from GameClient import Network
-import time
-pygame.font.init()
 
-board = pygame.transform.scale(pygame.image.load(os.path.join("img", "board_alt.png")), (750, 750))
-chessbg = pygame.image.load(os.path.join("img", "chessbg.png"))
-rect = (113, 113, 525, 525)
-t = "w"
+import time
 
 import socket
 import threading
 import pyaudio
 
+
+game_running = True
+width = 750
+height = 750
+board = None
+chessbg = None
+t = ""
+rect = None
+name = ""
+#name = input("Please type your name: ")
+wind = None
+def init_window():
+    global wind
+    wind = pygame.display.set_mode((width, height))
+#wind = DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+def install(package):
+    subprocess.call([sys.executable, "-m", "pip", "install", package])
+
+def install_requirements():
+    try:
+        print("Trying to install pygame")
+        import pygame
+    except:
+        print("Please install pygame if you want to play")
+        try:
+            print("Please wait while we try installing pygame")
+            import pip
+            install("pygame")
+            print("Pygame installed successfully")
+
+        except Exception as e:
+            print("Seems like print ins't installed on the system' trying to install pip")
+            imp_pip.main()
+            print("Pip installed, trying to download pygame")
+        try:
+            import pip
+            install("pygame")
+            print("pygame has been successfully installed")
+        except Exception as e:
+            print(e)
+
+
+def init_board():
+    global board, chessbg, rect, t
+    pygame.font.init()
+    board = pygame.transform.scale(pygame.image.load(os.path.join("img", "board_alt.png")), (750, 750))
+    chessbg = pygame.image.load(os.path.join("img", "chessbg.png"))
+    rect = (113, 113, 525, 525)
+    t = "w"
+
+
+
 vcclient = None
 n = None
+
 
 
 def clean_up():
@@ -194,7 +211,7 @@ def menu(wind, name):
 
 def draw_game_window(wind, cBoard, p1, p2, color, isReady):
     wind.blit(board, (0,0))
-    cBoard.draw(wind, color,color)
+    cBoard.draw(wind, color,color, Globals.selected)
 
 
     formatTime1 = str(int(p1 // 60)) + ":" + str(int(p1 % 60))
@@ -288,11 +305,11 @@ def select(pos, player="w"):
              xx = x-rect[0]
              yy = y -rect[1]
 
-             i = int(xx/ (rect[2] / 8))
-             j = int(yy / (rect[3] / 8))
+             c = int(xx/ (rect[2] / 8))
+             r = int(yy / (rect[3] / 8))
              if player == "b":
-                 return (7-i, 7-j)
-             return (i, j)
+                 return (7-r, 7-c)
+             return (r, c)
      else:
          return (-1,-1)
      """a (-1,-1) means that the position is not on the chess board"""
@@ -341,7 +358,19 @@ def connect():
                     n.send("select " + str(r) + " " + str(c) + " " + color)
         time.sleep(0.1)
 """
+
+def get_empty(board):
+    for r in range(8):
+        for c in range(8):
+            if board[r][c] == 0:
+                return (r,c)
+
+
+ctr = 0
+ctr2 = 0
+selected = None
 def event_handler(color):
+    global ctr,ctr2, selected
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             if color == "w":
@@ -369,8 +398,58 @@ def event_handler(color):
             if color == cBoard.turn and cBoard.is_full:
                 mouse_pos = pygame.mouse.get_pos()
                 n.send("update moves")
+
                 r, c = select(mouse_pos, color)
-                n.send("select " + str(r) + " " + str(c) + " " + color)
+                if (cBoard.board[r][c] != 0) and (cBoard.board[r][c].color == color):
+                    Globals.selected = cBoard.board[r][c]
+
+                else:
+                    if Globals.selected:
+                        if (c,r) in Globals.selected.moves:
+
+                            n.send(f"move_piece {color} {str(Globals.selected.row)} {str(Globals.selected.col)} {str(r)} {str(c)}")
+                            Globals.selected = None
+                            #n.send("select " + str(selected.row) + " " + str(selected.col) + " " + color)
+                            #n.send("select " + str(r) + " " + str(c) + " " + color)
+
+                """print("is piece selected?", cBoard.piece_selected)
+                if not cBoard.piece_selected:
+                    print("piece selected/ ", cBoard.piece_selected)
+                    if cBoard.board[c][r] != 0 and cBoard.board[c][r].color == color:
+                        
+                        cBoard.piece_selected = cBoard.board[c][r]
+                        n.send("select " + str(r) + " " + str(c) + " " + color)
+                        print("sent")
+                        print("piece selected2 is", cBoard.piece_selected)
+                        n.send("piece")
+                        ctr += 1
+                elif ctr >0:
+                    print("sent here")
+                    #ctr2+=1
+                    #ctr = 0
+                    #ctr2 = 0
+
+                    in_moves = (c,r) in cBoard.piece_selected.moves
+                    if (in_moves) or ( cBoard.board[c][r] != 0 and cBoard.board[c][r].color == color):
+                        n.send("select " + str(r) + " " + str(c) + " " + color)
+                        if in_moves:
+                            n.send("has played")
+                        else:
+                            n.send("piece")
+                            
+
+
+
+
+                    ctr = 0
+
+"""
+
+
+                #if not r not in range(8) or c not in range(8):
+                 #   r,c = get_empty(cBoard.board)
+
+
 
 
 data = None
@@ -423,12 +502,7 @@ def main_logic():
                 cBoard = n.send("w won")
                 break
 
-        if cBoard.checkmate("w"):
-            cBoard = n.send("b won")
-            break
-        elif cBoard.checkmate("b"):
-            cBoard = n.send("w won")
-            break
+
 
         ct += 1
         if ct % 5 == 0 and n:
@@ -455,10 +529,19 @@ def main_logic():
 
 
 def main():
-    width = 750
-    height = 750
+    global name
+    parser = argparse.ArgumentParser(description='Process args from launcher')
+    parser.add_argument("username", help="Client Username")
+    parser.add_argument("-ip","--server_ip",action="store" ,help="Server IP")
+    args = parser.parse_args()
+    name = args.username
+    install_requirements()
+    init_window()
+    init_board()
+    Globals.init()
     pygame.display.set_caption("Chess Game")
     menu(wind=wind, name=name)
+
 
 
 
