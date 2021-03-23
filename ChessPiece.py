@@ -1,7 +1,7 @@
 import pygame
 import os
 import traceback
-
+import Globals
 
 b_bishop = pygame.image.load(os.path.join("img", "black_bishop.png"))
 b_king = pygame.image.load(os.path.join("img", "black_king.png"))
@@ -60,7 +60,7 @@ class Piece:
             print(traceback.print_exc())
 
 
-    def draw(self,win,color, player="w"):
+    def draw(self,win,color, player="w", selected=None):
         if self.color =="w":
             this = White_Pieces[self.img]
         else:
@@ -76,7 +76,7 @@ class Piece:
         x = (4 - newcol) + round(self.startX + (newcol * self.rect[2] / 8)) #make sure i understand this part
         y = 3 + round(self.startY + (newrow * self.rect[3] / 8))#make sure i understamd this part
 
-        if self.is_selected and self.color == color:
+        if selected and str(self) == str(selected) and self.color == color:    #self == selected and self.color == color:
             pygame.draw.rect(win, (255, 0, 0), (x, y, 62, 62), 4)
 
         win.blit(this,(x,y))
@@ -99,7 +99,7 @@ class Piece:
             print(traceback.print_exc())
 
     def __str__(self):
-        return str(self.col) + ' ' + str(self.row)
+        return str(self.row) + ' ' + str(self.col)
 
 
 class Bishop(Piece):
@@ -219,7 +219,7 @@ class King(Piece):
             if p == 0:
                 add_moves.append((c,r+1))
             elif p.color != self.color:
-                add_moves.append(c, r + 1)
+                add_moves.append((c, r + 1))
 
         #bottom right
             if c<7:
@@ -233,8 +233,8 @@ class King(Piece):
             p = board[r][c-1]
             if p==0:
                 add_moves.append((c-1,r-1))
-            elif p.color!=self.color:
-                add_moves.append((c - 1, r - 1))
+            elif p.color != self.color:
+                add_moves.append((c - 1, r ))
 
         #middle right
         if c<7:
@@ -417,12 +417,14 @@ class Queen(Piece):
                      add_moves.append((above_col, box))
                      break
                  else:
-                     above_col = 9
+                     break
              above_col += 1
+         bottom_col = c - 1
+         above_col = c + 1
 
 
          for box in range(r - 1, -1, -1):
-             if bottom_col < 8:
+             if bottom_col > -1:
                  p=board[box][bottom_col]
                  if p == 0:
                      add_moves.append((bottom_col,box))
@@ -430,7 +432,7 @@ class Queen(Piece):
                      add_moves.append((bottom_col,box))
                      break
                  else:
-                     bottom_col = -1
+                     break
              bottom_col -= 1
 
          bottom_col = c - 1
@@ -447,7 +449,8 @@ class Queen(Piece):
                  else:
                      above_col = 8
              above_col += 1
-
+         bottom_col = c - 1
+         above_col = c + 1
 
          for box in range(r+1, 8):
              if bottom_col > -1:
@@ -458,8 +461,14 @@ class Queen(Piece):
                      add_moves.append((bottom_col,box))
                      break
                  else:
-                     bottom_col = -1
-             bottom_col = -1
+                     break
+             bottom_col -= 1
+
+
+             #changed here
+             bottom_col -=1
+         bottom_col = c - 1
+         above_col = c + 1
 
          # going up
          for box in range(r-1 ,-1 ,-1):

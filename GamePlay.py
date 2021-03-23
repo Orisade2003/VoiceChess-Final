@@ -164,7 +164,7 @@ def menu(wind, name):
         wind.blit(rep,(width/2 - rep.get_width()/2,40))
 
         if offline:
-            rep = sFont.render("Server Offline", 1, (255, 0, 0))
+            rep = sFont.render("The server is currenly offline, please try again later..", 1, (255, 0, 0))
             wind.blit(rep, (width/2 - rep.get_width()/2, 500))
 
 

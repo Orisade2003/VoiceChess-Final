@@ -1,6 +1,7 @@
 import pygame
 import os
 import time
+from copy import deepcopy
 from ChessPiece import Bishop
 from ChessPiece import King
 from ChessPiece import Rook
@@ -16,7 +17,7 @@ class Board:
     rect = (113, 113, 525, 525)
     startX = rect[0]
     startY = rect[1]
-
+    f=[]
     def __init__(self, rows, cols):
         rows, cols = (8, 8)
         self.board = [[0] * cols] * rows
@@ -26,6 +27,7 @@ class Board:
         self.winner=None
         self.last = None
         self.copy = True
+        self.piece_selected = None
         self.rows = rows
         self.cols = cols
         self.board = [[0 for x in range(8)] for y in range(rows)]
@@ -76,6 +78,7 @@ class Board:
 
         self.winner = None
         self.startTime = time.time()
+        self.get_all_moves()
 
     def get_all_moves(self):
         for r in range(self.rows):
@@ -85,7 +88,7 @@ class Board:
 
 
 
-    def draw(self, win, color, player="w"):
+    def draw(self, win, color, player="w", selected=None):
         z=()
         if self.last and color == self.turn:
             if player == "w":
@@ -108,7 +111,7 @@ class Board:
             for c in range(self.cols):
                 p = self.board[r][c]
                 if type(p) != int:
-                    p.draw(win, color, player)
+                    p.draw(win, color, player, selected)
                     if self.board[r][c].is_selected:
                         t = (r, c)
 
@@ -119,20 +122,24 @@ class Board:
             for c in range(self.cols):
                 if self.board[r][c] != 0:
                     if self.board[r][c].color != color:
-                        for move in self.board[r][c].moves:
+                        for move in self.board[r][c].moves:# was .moves before
                             kills.append(move)
         return kills
+
+
 
     def checked(self, color):
         self.get_all_moves()
         kills = self.get_kills(color)
-        king_pos = (9,9)
+        king_pos = (9, 9)
         for r in range(self.rows):
             for c in range(self.cols):
                 if self.board[r][c] != 0:
-                    if self.board[r][c].is_king and self.board[r][c].color == color:
-                        king_pos = (c,r)
+                    if type(self.board[r][c]) is King and self.board[r][c].color == color:
+                        king_pos = (c, r)#was c,r
         if king_pos in kills:
+            print("point of no return", king_pos)
+            self.f.append(king_pos)
             return True
         return False
 
@@ -144,19 +151,22 @@ class Board:
             for c in range(self.cols):
                 if self.board[r][c] != 0:
                     self.board[r][c].is_selected = False
+        self.piece_selected = False
+
 
 
 
 
     def checkmate(self, color):
         flag = False
+
         if self.checked(color):
             king = None
             for r in range(self.rows):
                 for c in range(self.cols):
                     if self.board[r][c] != 0:
                         box = self.board[r][c]
-                        if box.is_king and box.color == color:
+                        if type(box) is King and box.color == color:
                             king = box
             if king != None:
                 moves = king.get_valid_moves(board=self.board)
@@ -217,28 +227,34 @@ class Board:
 
 
     def move(self, start, end, color):
+        
         checkedBefore = self.checked(color)
         print("Trying to move to : ", end)
+
         changed = True
         nBoard = self.board[:]
+        
         if nBoard[start[0]][start[1]].is_pawn:
+            isfirst = nBoard[start[0]][start[1]].is_first
             nBoard[start[0]][start[1]].is_first = False
 
+        original_piece = nBoard[end[0]][end[1]]
         nBoard[start[0]][start[1]].move_to_pos((end[0], end[1]))
         nBoard[end[0]][end[1]] = nBoard[start[0]][start[1]]
         nBoard[start[0]][start[1]] = 0
         self.board = nBoard
-
+        
         if self.checked(color) or (checkedBefore and self.checked(color)):
             changed = False
             nBoard = self.board[:]
-            if nBoard[end[0]][end[1]].is_pawn:
-                nBoard[end[0]][end[1]].is_first = True
+            if not type(nBoard[end[0]][end[1]]) == int:
+                if nBoard[end[0]][end[1]].is_pawn:
+                    nBoard[end[0]][end[1]].is_first = isfirst
 
-            nBoard[end[0]][end[1]].move_to_pos((start[0], start[1]))
-            nBoard[start[0]][start[1]] = nBoard[end[0]][end[1]]
-            nBoard[end[0]][end[1]] = 0
-            self.board = nBoard
+                nBoard[end[0]][end[1]].move_to_pos((start[0], start[1]))
+                nBoard[start[0]][start[1]] = nBoard[end[0]][end[1]]
+                nBoard[end[0]][end[1]] = original_piece
+                self.board = nBoard
         else:
             self.resetSelect()
 
@@ -254,24 +270,147 @@ class Board:
         return changed
 
 
+    def checkmate3(self,color):
+        self.f = []
+        if not self.checked(color):
+            return False
+    
+        new_board = deepcopy(self)
+        boardlist = new_board.board
+        print(boardlist)
+        for col in range(len(boardlist)):
+            for row in range(len(boardlist[col])):
+                if type(boardlist[col][row]) == int:
+                    continue
+                if not boardlist[col][row].color == color:
+                    continue
+                    
+                p = boardlist[col][row]
+                all_moves = p.get_valid_moves(boardlist)
+
+                for t in all_moves:
+                    if new_board.move((col, row), (t[1],t[0]), color):
+                        print("this is where the checkm happens", t, type(p), p.color,(col,row))
+                        print(p.moves)
+
+                        return False
+        return True
+        
+        
+
+
+
+    def piece_select2(self, col, row, color): #change col row order if doesnt work
+        has_moved = False
+        previous = (-1, -1)
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if self.board[c][r] != 0:
+                    if self.board[c][r].is_selected:
+                        previous = (c,r)#change to r,c if doesnt work
+        print("previous is ", previous)
+        if self.board[col][row] == 0 and previous != (-1, -1):
+            c = previous[0]
+            r = previous[1]
+            moves = self.board[c][r].moves
+            if (col, row) in moves: # change to col, row
+                has_moved = self.move(previous, (row, col), color)#cheack here
+
+        else:
+            if previous == (-1, -1):
+                self.resetSelect()
+                if self.board[col][row] != 0:
+                    self.board[col][row].is_selected = True
+                    print("changed ", self.board[col][row])
+            else:
+                     if self.board[previous[0]][previous[1]].color != self.board[col][row].color:
+                         moves = self.board[previous[0]][previous[1]].moves
+                         if (col, row) in moves:# change to col row
+                             has_moved = self.move(previous, (row, col), color)
+
+                         if self.board[col][row].color == color:
+                             self.board[col][row].is_selected = True
+                      # castle
+                     else:
+                        if self.board[col][row].color == color:
+                             self.resetSelect()
+                             if self.board[previous[0]][previous[1]].has_moved == False and self.board[previous[0]][previous[1]].is_rook and self.board[col][row].is_king and col!= previous[1] and previous!=(-1,-1):
+                                can_castle = True
+                                if previous[1] < col:
+                                    for c in range(previous[1]+1, col):
+                                        if self.board[row][c] != 0:
+                                            can_castle = False
+                                    if can_castle:
+                                        has_moved = self.move(previous, (row,3), color)
+                                        has_moved = self.move((row, col), (row, 2), color)
+                                        if has_moved == False:
+                                            self.board[row][col].is_selected = True
+                                else:
+                                    for c in range(col+1, previous[1]):
+                                        if self.board[row][c] != 0:
+                                            can_castle =False
+                                    if can_castle:
+                                        has_moved = self.move(previous, (row, 5), color)
+                                        has_moved = self.move((row,col), (row, 6), color)
+                                    if has_moved == False:
+                                        self.board[row][col].is_selected = True
+                             else:
+                                self.board[col][row].is_selected = True
+
+        if has_moved:
+            if self.turn == "b":
+                if self.checkmate3("w"):
+                    self.winner = "b"
+
+                self.turn = "w"
+
+                self.resetSelect()
+
+
+            else:
+                if self.checkmate3("b"):
+                    self.winner = "w"
+                self.turn = "b"
+
+                self.resetSelect()
+        print("the piece selected is :     ",previous, col, row)
+        print("previous : ", previous)
+        print("The Piece is now")
 
 
 
 
-    def piece_select(self, col, row, color):
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def piece_select(self, col, row, color): #change col row order if doesnt work
         has_moved = False
         previous = (-1, -1)
         for r in range(self.rows):
             for c in range(self.cols):
                 if self.board[r][c] != 0:
                     if self.board[r][c].is_selected:
-                        previous = (r, c)
+                        previous = (r,c)#change to r,c if doesnt work
         print("previous is ", previous)
         if self.board[row][col] == 0 and previous != (-1, -1):
             r = previous[0]
             c = previous[1]
             moves = self.board[r][c].moves
-            if (col, row) in moves:
+            if (col, row) in moves: # change to col, row
                 has_moved = self.move(previous, (row, col), color)
 
         else:
@@ -279,10 +418,11 @@ class Board:
                 self.resetSelect()
                 if self.board[row][col] != 0:
                     self.board[row][col].is_selected = True
+                    print("changed ", self.board[row][col])
             else:
                      if self.board[previous[0]][previous[1]].color != self.board[row][col].color:
                          moves = self.board[previous[0]][previous[1]].moves
-                         if (col, row) in moves:
+                         if (col, row) in moves:# change to col row
                              has_moved = self.move(previous, (row, col), color)
 
                          if self.board[row][col].color == color:
@@ -316,10 +456,19 @@ class Board:
 
         if has_moved:
             if self.turn == "b":
-               self.turn = "w"
-               self.resetSelect()
+                if self.checkmate3("w"):
+                    self.winner = "b"
+
+                self.turn = "w"
+
+                self.resetSelect()
+
+
             else:
+                if self.checkmate3("b"):
+                    self.winner = "w"
                 self.turn = "b"
+
                 self.resetSelect()
         print("the piece selected is :     ",previous, col, row)
         print("previous : ", previous)
