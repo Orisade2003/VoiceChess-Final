@@ -5,6 +5,17 @@ import time
 import pickle
 import traceback
 from twisted.internet.protocol import DatagramProtocol
+from Cryptodome.Cipher import AES
+from Cryptodome.Util.Padding import pad
+from Cryptodome.Util.Padding import unpad
+key = b'mysecretpassword'
+
+
+
+
+import base64
+import hashlib
+
 from twisted.internet import reactor
 import pyaudio
 
@@ -50,9 +61,47 @@ class Network(DatagramProtocol):
                 pass
                 """
 
+    def Encrypt1(self, msg, key):
+        iv = ""
+        with open('iv.txt', 'rb') as c_file:
+            iv = c_file.read(16)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        chiphertext = cipher.encrypt(pad(msg, AES.block_size))
+        print(cipher.iv)
+        print(chiphertext)
+        return chiphertext
+
+    def Decrypt1(self,ciphertext, key):
+        iv = ""
+        with open("iv.txt", 'rb') as c_file:
+            iv = c_file.read(16)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
+        #print(msg)
+        return msg
+
+    def Encrypt(self, msg, key):
+        crypt = bytearray()
+        for ch in msg:
+            chnum = ch  # - ord('a')
+            chnum += key
+            # chnum %= 26
+            chnum %= 256
+            crypt += (chnum).to_bytes(1, byteorder="big")  # + #ord('a'))
+        return crypt
+
+    def Decrypt(self, crypt, key):
+        msg = bytearray()
+        for ch in crypt:
+            chnum = ch
+            chnum -= key
+            chnum %= 256
+            msg += (chnum).to_bytes(1, byteorder="big")
+        return msg
+
     def connect(self):
         self.client.connect(self.add)
-        return self.client.recv(4096 * 10)
+        return self.Decrypt1(self.client.recv(4096 * 10),key)
 
     def disconnect(self):
         self.client.close()
@@ -60,7 +109,7 @@ class Network(DatagramProtocol):
     def send(self, send_data, should_pickle=False):
             cTime = time.time()
             info = None
-            while time.time() - cTime < 5:
+            while time.time() - cTime < 5: # change back to <5
                 if type(self.client) is not socket.socket:
                     continue
                 print("send_data is ", send_data)
@@ -74,6 +123,7 @@ class Network(DatagramProtocol):
 
                 #send_data = pickle.dumps(send_data) if should_pickle else str(send_data).encode()
                 try:
+                    send_data = self.Encrypt1(send_data,key)
                     self.client.send(send_data)
                 except Exception as e:
 
@@ -81,7 +131,7 @@ class Network(DatagramProtocol):
                     print(traceback.print_exc())
 
                 info = self.client.recv(4096 * 10)
-
+                info = self.Decrypt1(info, key)
                 try:
                     info = pickle.loads(info)
                     break
@@ -92,7 +142,7 @@ class Network(DatagramProtocol):
 
             return info
 
-    def recv(self, data):
+    """def recv(self, data):
         try:
             data = self.client.recv(2048 * 2)
         except Exception as e:
@@ -103,4 +153,4 @@ class Network(DatagramProtocol):
         if type(data) is bytes or type(data) is bytearray:
             return data.decode()
         else:
-            return pickle.loads(data)
+            return pickle.loads(data)"""

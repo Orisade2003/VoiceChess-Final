@@ -77,7 +77,7 @@ class VCClient:
     def __init__(self, port):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.target_ip = "10.100.102.6"
+            self.target_ip = "10.100.102.14" #was 10.100.102.6
             self.target_port = int(port)
             self.voicechat_running = True
             print(self.target_port)
@@ -164,7 +164,7 @@ def menu(wind, name):
         wind.blit(rep,(width/2 - rep.get_width()/2,40))
 
         if offline:
-            rep = sFont.render("The server is currenly offline, please try again later..", 1, (255, 0, 0))
+            rep = sFont.render("Server Offline", 1, (255, 0, 0))
             wind.blit(rep, (width/2 - rep.get_width()/2, 500))
 
 

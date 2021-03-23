@@ -5,6 +5,11 @@ import pickle
 from ChessBoard import Board
 from network import *
 import traceback
+from Cryptodome.Cipher import AES
+from Cryptodome.Util.Padding import pad
+from Cryptodome.Util.Padding import unpad
+key = b'mysecretpassword'
+
 import threading
 server = "0.0.0.0"
 port = 8080
@@ -29,6 +34,58 @@ spec_ctr = 0
 specs= []
 conn_ctr = 0
 vcslist=[]
+
+
+def Encrypt1(msg, key):
+    iv = ""
+    with open('iv.txt', 'rb') as c_file:
+        iv = c_file.read(16)
+    cipher = AES.new(key,AES.MODE_CBC,iv)
+    ciphertext = cipher.encrypt(pad(msg,AES.block_size))
+    #print(cipher.iv)
+    #print(ciphertext)
+    #print(type(ciphertext))
+    return ciphertext
+
+def Decrypt1(ciphertext, key):
+    iv=""
+    with open("iv.txt", 'rb') as c_file:
+        iv = c_file.read(16)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
+    #print(msg)
+    return msg
+
+
+
+def Encrypt(msg, key):
+    crypt = bytearray()
+    for ch in msg:
+        chnum = ch  # - ord('a')
+        chnum += key
+        chnum %= 256
+        # chnum %= 26
+        crypt += chnum.to_bytes(1, byteorder="big")  # + #ord('a'))
+    return crypt
+
+
+def Decrypt(crypt, key):
+    msg = bytearray()
+    for ch in crypt:
+        chnum = ch
+        chnum -= key
+        chnum %= 256
+        msg += chnum.to_bytes(1, byteorder="big")
+    return msg
+
+
+def SendData(con, msg):
+    con.sendall(Encrypt1(msg,key))
+
+def RecvData(con, size):
+    data = con.recv(size)
+    data = Decrypt1(data,key)
+    return data
 
 
 def times_in_dictlist(l, room):
@@ -61,9 +118,11 @@ def make_connection(con, game_num, isSpec = False):
             cBoard.is_full = True
             cBoard.startTime = time.time()
 
-        con.send(serilNum)
-        con.send(str(8081).encode())
-        voice_chat_ack = con.recv(1024).decode()
+
+        SendData(con,serilNum)
+        SendData(con,str(8081).encode())
+        voice_chat_ack = RecvData(con, 1024).decode()
+
         if voice_chat_ack != "ok":
             #to do
             pass
@@ -74,7 +133,7 @@ def make_connection(con, game_num, isSpec = False):
             if game_num not in room_dict:
                 break
             try:
-                info = con.recv(8192 * 4)
+                info = RecvData(con, 8192 * 4)
                 check = info
                 info = info.decode("utf-8")
 
@@ -144,14 +203,14 @@ def make_connection(con, game_num, isSpec = False):
                         # print("The port here is type", type(voicechat_port))
 
                     srl = pickle.dumps(voicechat_port)
-                    con.sendall(srl)
+                    SendData(con, srl)
                     # go over conlist and
 
 
                             #voicechat_port = c[]
                     vcrequest_flag = False
                 else:
-                    con.sendall(all_data)
+                    SendData(con, all_data)
 
 
             except ConnectionResetError:
@@ -201,12 +260,12 @@ def make_connection(con, game_num, isSpec = False):
         cBoard = room_dict[av_games[spec_ind]]
         cBoard.start_user = "s"
         send_data = pickle.dumps(cBoard)
-        con.send(send_data)
+        SendData(con, send_data)
         while True:
             av_games = list(room_dict.keys())
             cBoard = room_dict[av_games[spec_ind]]
             try:
-                d = con.recv(256)
+                d = RecvData(con,256)
                 data_received = d.decode("utf-8")
 
                 if not d:
@@ -226,7 +285,7 @@ def make_connection(con, game_num, isSpec = False):
                         print(e)
                         print(traceback.print_exc())
                     sendData = pickle.dumps(cBoard)
-                    con.sendall(sendData)
+                    SendData(con, sendData)
 
             except Exception as e:
                 print(e)
