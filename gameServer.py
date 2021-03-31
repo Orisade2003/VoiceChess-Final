@@ -42,7 +42,7 @@ def Encrypt1(msg, key):
     iv = ""
     with open('iv.txt', 'rb') as c_file:
         iv = c_file.read(16)
-    cipher = AES.new(key,AES.MODE_CBC,iv)
+    cipher = AES.new(key,AES.MODE_CFB,iv)
     ciphertext = cipher.encrypt(pad(msg,AES.block_size))
     #print(cipher.iv)
     #print(ciphertext)
@@ -53,7 +53,7 @@ def Decrypt1(ciphertext, key):
     iv=""
     with open("iv.txt", 'rb') as c_file:
         iv = c_file.read(16)
-    cipher = AES.new(key, AES.MODE_CBC, iv)
+    cipher = AES.new(key, AES.MODE_CFB, iv)
     msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
     #print(msg)
     return msg
@@ -86,7 +86,10 @@ def SendData(con, msg):
 
 def RecvData(con, size):
     data = con.recv(size)
-    data = Decrypt1(data,key)
+    try:
+        data = Decrypt1(data,key)
+    except:
+        print("this is the data", data)
     return data
 
 
@@ -135,6 +138,7 @@ def make_connection(con, game_num, isSpec = False):
             if game_num not in room_dict:
                 break
             try:
+
                 info = RecvData(con, 8192 * 4)
                 check = info
                 info = info.decode("utf-8")
@@ -165,6 +169,7 @@ def make_connection(con, game_num, isSpec = False):
 
                         if cBoard.checkmate3(opp_color):
                             cBoard.winner = color
+
                         else:
                             cBoard.turn = opp_color
 
@@ -205,6 +210,8 @@ def make_connection(con, game_num, isSpec = False):
                         print("white won")
                     if info == "vcport":
                         vcrequest_flag = True
+
+
 
 
 

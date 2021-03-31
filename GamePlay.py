@@ -10,7 +10,7 @@ import os
 import pygame
 import pickle
 from GameClient import Network
-
+import sys
 import time
 
 import socket
@@ -87,6 +87,7 @@ def clean_up():
     if n:
         del n
 
+
     print("clean up finished")
 
 
@@ -94,7 +95,7 @@ class VCClient:
     def __init__(self, port):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.target_ip = "10.100.102.14" #was 10.100.102.6
+            self.target_ip = "157.90.236.209" #was 10.100.102.6
             self.target_port = int(port)
             self.voicechat_running = True
             print(self.target_port)
@@ -189,8 +190,8 @@ def menu(wind, name):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
                 clean_up()
+                pygame.quit() ##remove display maybe
 
                 exit(0)
 
