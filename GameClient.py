@@ -10,7 +10,7 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad
 from Cryptodome.Util.Padding import unpad
 key = b'mysecretpassword'
-
+iv = b'aaaaaaaaaaaaaaaa'
 
 
 
@@ -63,9 +63,10 @@ class Network(DatagramProtocol):
                 """
 
     def Encrypt1(self, msg, key):
-        iv = ""
-        with open('iv.txt', 'rb') as c_file:
-            iv = c_file.read(16)
+        global iv
+        #iv = ""
+        #with open('iv.txt', 'rb') as c_file:
+            #iv = c_file.read(16)
         cipher = AES.new(key, AES.MODE_CBC, iv)
         chiphertext = cipher.encrypt(pad(msg, AES.block_size))
         print(cipher.iv)
@@ -73,9 +74,10 @@ class Network(DatagramProtocol):
         return chiphertext
 
     def Decrypt1(self,ciphertext, key):
-        iv = ""
-        with open("iv.txt", 'rb') as c_file:
-            iv = c_file.read(16)
+        global iv
+        #iv = ""
+        #with open("iv.txt", 'rb') as c_file:
+            #iv = c_file.read(16)
         cipher = AES.new(key, AES.MODE_CBC, iv)
         msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
         #print(msg)
