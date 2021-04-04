@@ -39,7 +39,7 @@ conn_ctr = 0
 vcslist=[]
 
 
-iv = b'aaaaaaaaaaaaaaaa'
+
 
 def Encrypt1(msg, key):
     """
@@ -48,10 +48,8 @@ def Encrypt1(msg, key):
     :param key: the encryption key, bytes object
     :return: the function returns the encrypted msg asa a bytes object
     """
-    global iv
-    #iv = ""
-    #with open('iv.txt', 'rb') as c_file:
-        #iv = c_file.read(16)
+    with open('iv.txt', 'rb') as c_file:
+        iv = c_file.read(16)
     cipher = AES.new(key,AES.MODE_CBC,iv)
     ciphertext = cipher.encrypt(pad(msg,AES.block_size))
     #print(cipher.iv)
@@ -66,10 +64,8 @@ def Decrypt1(ciphertext, key):
     :param key: thhe encryption key, bytes
     :return:  the function returns the decrypted msg , string
     """
-    global iv
-    #iv=""
-    #with open("iv.txt", 'rb') as c_file:
-       # iv = c_file.read(16)
+    with open("iv.txt", 'rb') as c_file:
+        iv = c_file.read(16)
     cipher = AES.new(key, AES.MODE_CBC, iv)
     msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
     #print(msg)
