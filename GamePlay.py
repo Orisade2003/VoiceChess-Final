@@ -28,13 +28,19 @@ rect = None
 name = ""
 #name = input("Please type your name: ")
 wind = None
+
+
+#this function initializes the pygame window
 def init_window():
     global wind
     wind = pygame.display.set_mode((width, height))
 #wind = DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+
+#this function installs pip for the user
 def install(package):
     subprocess.call([sys.executable, "-m", "pip", "install", package])
 
+#this function checks if the user has pygame installed, and if he doesn't it installs it for the user
 def install_requirements():
     try:
         print("Trying to install pygame")
@@ -59,11 +65,12 @@ def install_requirements():
             print(e)
 
 
+#this function initializes the board drawing
 def init_board():
     global board, chessbg, rect, t
     pygame.font.init()
     board = pygame.transform.scale(pygame.image.load(os.path.join("img", "board_alt.png")), (750, 750))
-    chessbg = pygame.image.load(os.path.join("img", "chessbg.png"))
+    chessbg = pygame.image.load(os.path.join("img", "ChessKingBG2.png")) #"chessbg.png"
     rect = (113, 113, 525, 525)
     t = "w"
 
@@ -73,7 +80,7 @@ vcclient = None
 n = None
 
 
-
+#this function ends the game, and disconnects the voicechat client from the server
 def clean_up():
     global game_running, vcclient, n
     print("starting clean up")
@@ -91,11 +98,16 @@ def clean_up():
     print("clean up finished")
 
 
+#this is the class for the voice chat client
 class VCClient:
+
     def __init__(self, port):
+        """
+        :param port: string, the port that the function uses to connect to the server
+        """
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.target_ip = "157.90.236.209" #was 10.100.102.6
+            self.target_ip = "127.0.0.1" #was 10.100.102.6
             self.target_port = int(port)
             self.voicechat_running = True
             print(self.target_port)
@@ -135,6 +147,9 @@ class VCClient:
         print("voice chat is working")
 
     def receive_server_data(self):
+        """
+        this function receives data from the server as bytes' and decodes to audio
+        """
         while self.voicechat_running:
             try:
                 data = self.s.recv(1024)
@@ -143,6 +158,9 @@ class VCClient:
                 pass
 
     def send_data_to_server(self):
+        """
+        this function sends audio as bytes to the server, so it is sent to the other player
+        """
         while self.voicechat_running:
             try:
                 data = self.recording_stream.read(1024)
@@ -151,6 +169,9 @@ class VCClient:
                 pass
 
     def dele(self):
+        """
+        deletes the instance of the object
+        """
         #self.s.shutdown()
         print("called")
         self.voicechat_running = False
@@ -170,6 +191,12 @@ class VCClient:
 
 
 def menu(wind, name):
+    """
+
+    :param wind: pygame window
+    :param name: player name - string
+    this function is in charge of setting up the menu screen before the game starts
+    """
     global cBoard, chessbg, game_running
 
     offline = False
@@ -182,7 +209,7 @@ def menu(wind, name):
         wind.blit(rep,(width/2 - rep.get_width()/2,40))
 
         if offline:
-            rep = sFont.render("The server is currenly offline, please try again later..", 1, (255, 0, 0))
+            rep = sFont.render("Check Your Connection ", 1, (255, 0, 0))
             wind.blit(rep, (width/2 - rep.get_width()/2, 500))
 
 
@@ -211,6 +238,16 @@ def menu(wind, name):
 
 
 def draw_game_window(wind, cBoard, p1, p2, color, isReady):
+    """
+
+    :param wind: pygame window
+    :param cBoard: instance of Board class, this board represents the board in th game
+    :param p1:
+    :param p2:
+    :param color: the color of the player, string
+    :param isReady:bool, true if 2 players are in the room and false otherwise
+    the function is in charge of drawing the backbone of the board screen drawing the text and the time/
+    """
     wind.blit(board, (0,0))
     cBoard.draw(wind, color,color, Globals.selected)
 
@@ -250,18 +287,18 @@ def draw_game_window(wind, cBoard, p1, p2, color, isReady):
             font = pygame.font.SysFont("comicsans", 30)
             rep = "You Are White!"
             show = font.render(rep, 1, (255, 0 ,0))
-            wind.blit(show, (width/2 - show.get_width()/2, 10))
+            wind.blit(show, (width/2 - show.get_width()/2 + 50 , 10)) #remove plus 100
         elif color == "b":
             font = pygame.font.SysFont("comicsans", 30)
             rep = "You Are Black!"
             show = font.render(rep, 1, (255, 0 ,0))
-            wind.blit(show,(width/2 - show.get_width()/2, 10))
+            wind.blit(show,(width/2 - show.get_width()/2 + 50, 10))
 
         if cBoard.turn == color:
             cTime = time.time()
 
             rep = font.render("It Is Your turn, please proceed", 1, (255, 0 ,0))
-            wind.blit(rep, (width/2 - rep.get_width() / 2, 700))
+            wind.blit(rep, (width/2 - rep.get_width() / 2 - 40,  700))
         else:
             cTime = time.time()
             rep = font.render("It Is their turn", 1, (255, 0, 0))
@@ -270,6 +307,12 @@ def draw_game_window(wind, cBoard, p1, p2, color, isReady):
 
 
 def end_screen(wind, txt):
+    """
+
+    :param wind: pygame window
+    :param txt: text to display, string
+    the function draws txt on the middle of the window
+    """
     pygame.font.init()
     font = pygame.font.SysFont("comicsans", 80)
     rep = font.render(txt, 1, (255, 0 ,0))
@@ -298,6 +341,12 @@ def end_screen(wind, txt):
 
 """this fuction will return a position on the board"""
 def select(pos, player="w"):
+     """
+
+     :param pos: mouse position, tuple
+     :param player: string, color of the player
+     :return: the function turns the mouse position into a tuple which represents a position on the board.
+     """
      y = pos[1]
      x = pos[0]
 
@@ -361,6 +410,11 @@ def connect():
 """
 
 def get_empty(board):
+    """
+
+    :param board: 2 dimensional list, which contains the different pieces on the board
+    :return: returns the first empty position on the board as a tuple
+    """
     for r in range(8):
         for c in range(8):
             if board[r][c] == 0:
@@ -371,6 +425,11 @@ ctr = 0
 ctr2 = 0
 selected = None
 def event_handler(color):
+    """
+
+    :param color: string, color of the player
+    the function is in charge of handling all the different events that can occur during the game
+    """
     global ctr,ctr2, selected
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -455,6 +514,9 @@ def event_handler(color):
 
 data = None
 def main_logic():
+    """
+    :return: the function is in charge of the main logic on the client side, such as deciding what to tsend to the server and when
+    """
     global name, t, cBoard, vcclient, n, data
     color = cBoard.start_user
     ct = 0
@@ -463,7 +525,7 @@ def main_logic():
 #    print(n.server)
 
     vcclient = VCClient(voicechat_port)
-    cBoard = n.send("update_moves")  # if doesnt work: try without the underscore
+    cBoard = n.send("update_moves")
 
     cBoard = n.send("name " + name)
 
@@ -530,6 +592,9 @@ def main_logic():
 
 
 def main():
+    """
+    the function is in charge of calling other functions, as well as get the arguments from the launcher
+    """
     global name
     parser = argparse.ArgumentParser(description='Process args from launcher')
     parser.add_argument("username", help="Client Username")
@@ -540,7 +605,7 @@ def main():
     init_window()
     init_board()
     Globals.init()
-    pygame.display.set_caption("Chess Game")
+    pygame.display.set_caption("VoiceChess")
     menu(wind=wind, name=name)
 
 

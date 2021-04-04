@@ -5,6 +5,7 @@ import pickle
 from ChessBoard import Board
 from network import *
 import traceback
+import mysql.connector
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad
 from Cryptodome.Util.Padding import unpad
@@ -39,10 +40,16 @@ vcslist=[]
 
 
 def Encrypt1(msg, key):
+    """
+
+    :param msg: the message to encrypt, string
+    :param key: the encryption key, bytes object
+    :return: the function returns the encrypted msg asa a bytes object
+    """
     iv = ""
     with open('iv.txt', 'rb') as c_file:
         iv = c_file.read(16)
-    cipher = AES.new(key,AES.MODE_CFB,iv)
+    cipher = AES.new(key,AES.MODE_CBC,iv)
     ciphertext = cipher.encrypt(pad(msg,AES.block_size))
     #print(cipher.iv)
     #print(ciphertext)
@@ -50,10 +57,16 @@ def Encrypt1(msg, key):
     return ciphertext
 
 def Decrypt1(ciphertext, key):
+    """
+
+    :param ciphertext:encrypted msg, bytes
+    :param key: thhe encryption key, bytes
+    :return:  the function returns the decrypted msg , string
+    """
     iv=""
     with open("iv.txt", 'rb') as c_file:
         iv = c_file.read(16)
-    cipher = AES.new(key, AES.MODE_CFB, iv)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
     msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
     #print(msg)
     return msg
@@ -80,11 +93,46 @@ def Decrypt(crypt, key):
         msg += chnum.to_bytes(1, byteorder="big")
     return msg
 
+def add_winner(winner):
+    """
+
+    :param winner: the name of the winner of the chess game
+    :return: the function adds a win to wins counter of the winner in the database
+    """
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="io.pngxxwp7673G",
+        database="voicechessusersdb")
+    mycursor = mydb.cursor()
+    sql = "Update Users Set Wins = Wins + 1 WHERE Username = %s"
+    val = (winner,)
+    mycursor.execute(sql, val)
+    mydb.commit()
+
+
+
+    #UPDATE Users SET Wins = Wins + 1 WHERE
+
+
+
 
 def SendData(con, msg):
+    """
+
+    :param con: socket
+    :param msg: message to send, string
+    the function encrypts msg and sends it to the socket
+    """
     con.sendall(Encrypt1(msg,key))
 
 def RecvData(con, size):
+    """
+
+    :param con: socket
+    :param size: size of message to receive from the client
+    :return: the decrypted message received from the client as a string
+    """
     data = con.recv(size)
     try:
         data = Decrypt1(data,key)
@@ -94,12 +142,25 @@ def RecvData(con, size):
 
 
 def times_in_dictlist(l, room):
+    """
+
+    :param l: dictionary of players
+    :param room: room number, int
+    :return: returns true if the dictionary has 0 or 2 instances of player with room number l
+    """
     c=0
     for d in l:
         if d["room"] == room:
             c+=1
     return c == 2 or c == 0
 def make_connection(con, game_num, isSpec = False):
+    """
+
+    :param con: client socket
+    :param game_num: int, game number
+    :param isSpec: boolean, whether the client is a player or a spectator
+    this function is in charge of the communication with the client, answers the clients' requests , and calls other functions to make necessary changes to the board
+    """
     voicechat_port = "8081"
     vcrequest_flag = False
     name = ""
@@ -205,8 +266,10 @@ def make_connection(con, game_num, isSpec = False):
                     if info == "b won":
                         cBoard.winner = "b"
                         print("black won")
+                        add_winner(cBoard.player2_name)
                     if info =="w won":
                         cBoard.winner = "w"
+                        add_winner(cBoard.player1_name)
                         print("white won")
                     if info == "vcport":
                         vcrequest_flag = True
@@ -392,9 +455,13 @@ class Room:
 
 
 
-
+# this class is incharge of handling the voice chats on the server side
 class VCServer:
     def __init__(self, port):
+        """
+        :param port: the port which thee server connects to
+        this function initializes the voice chat server
+        """
         self.ip = "0.0.0.0"
         while 1:
             try:
@@ -412,6 +479,9 @@ class VCServer:
         t.start()
 
     def accept_connections(self):
+        """
+        this function accepts client' connection requests
+        """
         self.s.listen(100)
 
         print('Running on IP: ' + self.ip)
@@ -426,6 +496,11 @@ class VCServer:
             threading.Thread(target=self.handle_client, args=(c, addr)).start()
 
     def broadcast(self, sock, data):
+        """
+        :param sock: client socket
+        :param data: the data which needs to be sent to the client, bytes
+        the function sends the data to the client
+        """
         for client in self.connections:
             if client != self.s and client != sock:
                 try:
@@ -434,6 +509,11 @@ class VCServer:
                     pass
 
     def handle_client(self, c, addr):
+        """
+        :param c: socket
+        :param addr: ip address of the client
+        the function is in charge of handling the clients' connection
+        """
         while True:
             try:
                     data = c.recv(1024)

@@ -25,7 +25,7 @@ class Network(DatagramProtocol):
         self.port = 8080
         self.client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.client.settimeout(5)
-        self.host = "157.90.236.209"
+        self.host = "localhost"
         self.add = (self.host, self.port)
         self.board = self.connect()
         self.board = pickle.loads(self.board)
@@ -66,7 +66,7 @@ class Network(DatagramProtocol):
         iv = ""
         with open('iv.txt', 'rb') as c_file:
             iv = c_file.read(16)
-        cipher = AES.new(key, AES.MODE_CFB, iv)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
         chiphertext = cipher.encrypt(pad(msg, AES.block_size))
         print(cipher.iv)
         print(chiphertext)
@@ -76,7 +76,7 @@ class Network(DatagramProtocol):
         iv = ""
         with open("iv.txt", 'rb') as c_file:
             iv = c_file.read(16)
-        cipher = AES.new(key, AES.MODE_CFB, iv)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
         msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
         #print(msg)
         return msg
