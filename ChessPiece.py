@@ -73,8 +73,8 @@ class Piece:
             newcol = self.col
             newrow = self.row
 
-        x = (4 - newcol) + round(self.startX + (newcol * self.rect[2] / 8)) #make sure i understand this part
-        y = 3 + round(self.startY + (newrow * self.rect[3] / 8))#make sure i understamd this part
+        x = (4 - newcol) + round(self.startX + (newcol * self.rect[2] / 8))
+        y = 3 + round(self.startY + (newrow * self.rect[3] / 8))
 
         if selected and str(self) == str(selected) and self.color == color:    #self == selected and self.color == color:
             pygame.draw.rect(win, (255, 0, 0), (x, y, 62, 62), 4)
@@ -83,10 +83,7 @@ class Piece:
 
 
 
-        """all_moves = self.moves for move in all_moves:
-            x = 33 + round(self.startX + (move[0] * self.rect[2] / 8))#understand better
-            y = 33 + round(self.startY + (move[1] * self.rect[3] / 8))#understand better
-            pygame.draw.circle(win,(255, 0 ,0),(x,y),10)"""
+
 
     def move_to_pos(self,pos):
         try:

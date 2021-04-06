@@ -11,6 +11,7 @@ from ChessPiece import Knight
 import time
 import pygame
 
+#this class is in charge of the board object, which represents the board drawn on the client's screen
 class Board:
     ROWS=8
     COLUMNS=8
@@ -19,6 +20,11 @@ class Board:
     startY = rect[1]
     f=[]
     def __init__(self, rows, cols):
+        """
+
+        :param rows: number of rows on the board, int
+        :param cols: number of columns on the board, int
+        """
         rows, cols = (8, 8)
         self.board = [[0] * cols] * rows
         print(self.board)
@@ -81,6 +87,9 @@ class Board:
         self.get_all_moves()
 
     def get_all_moves(self):
+        """
+        the function adds all the piece's moves to a list
+        """
         for r in range(self.rows):
             for c in range(self.cols):
                 if self.board[r][c] != 0:
@@ -89,6 +98,14 @@ class Board:
 
 
     def draw(self, win, color, player="w", selected=None):
+        """
+
+        :param win:pygame window
+        :param color: what color is the client,string
+        :param player: whose turn is it, string
+        :param selected: bool, which piece is selected
+        the function is charge of drawing blue circles around the 2 spots involved in the opponent's last move, and red squares around the current piece selected by the user
+        """
         z=()
         if self.last and color == self.turn:
             if player == "w":
@@ -117,6 +134,10 @@ class Board:
 
 
     def get_kills(self, color):
+        """
+        :param color: color of the player
+        :return: a list of all the moves in which the client can capture the other player's pieces.
+        """
         kills = []
         for r in range(self.rows):
             for c in range(self.cols):
@@ -129,6 +150,11 @@ class Board:
 
 
     def checked(self, color):
+        """
+
+        :param color: color of the player
+        :return: a boolean, True if there is a check and false otherwise
+        """
         self.get_all_moves()
         kills = self.get_kills(color)
         king_pos = (9, 9)
@@ -147,6 +173,9 @@ class Board:
 
 
     def resetSelect(self):
+        """
+        the function makes sure no piece is currently selected, and un selects selected pieces
+        """
         for r in range(self.rows):
             for c in range(self.cols):
                 if self.board[r][c] != 0:
@@ -227,6 +256,13 @@ class Board:
 
 
     def move(self, start, end, color):
+        """
+
+        :param start: tuple, starting position of the selected piece
+        :param end: tuple, end position of the selected piece
+        :param color: the player's color
+        :return: bool, the funcion moves the piece to the end postion if the move is legal and returns true, if the move isn't legal the function returns false
+        """
         
         checkedBefore = self.checked(color)
         print("Trying to move to : ", end)
@@ -271,6 +307,11 @@ class Board:
 
 
     def checkmate3(self,color):
+        """
+
+        :param color: player's color, string
+        :return: bool, true if there is a checkmate, false otherwise
+        """
         self.f = []
         if not self.checked(color):
             return False
