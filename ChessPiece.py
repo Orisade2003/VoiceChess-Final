@@ -472,7 +472,7 @@ class Queen(Piece):
              p = board[box][c]
              if p == 0:
                  add_moves.append((c,box))
-             elif self.color != self.color:
+             elif self.color != p.color:
                  add_moves.append((c,box))
                  break
              else:

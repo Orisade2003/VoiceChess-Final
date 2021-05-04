@@ -190,7 +190,7 @@ def make_connection(con, game_num, isSpec = False):
         voice_chat_ack = RecvData(con, 1024).decode()
 
         if voice_chat_ack != "ok":
-            #to do
+
             pass
 
         conn_ctr += 1
@@ -211,8 +211,8 @@ def make_connection(con, game_num, isSpec = False):
                         data = info.split(" ")
                         print(data)
                         color = data[1]
-                        current_row = int(data[2])  # switch to col = int(data[1])
-                        current_col = int(data[3])  # switch to  row = int(data[2])
+                        current_row = int(data[2])
+                        current_col = int(data[3])
 
                         new_row = int(data[4])
                         new_col = int(data[5])
@@ -230,6 +230,14 @@ def make_connection(con, game_num, isSpec = False):
 
                         if cBoard.checkmate3(opp_color):
                             cBoard.winner = color
+                            winner = cBoard.winner
+                            if winner == "w":
+                                print("Her2e")
+                                add_winner(cBoard.player1_name)
+                            elif winner == "b":
+                                print("here3")
+                                add_winner(cBoard.player2_name)
+
 
                         else:
                             cBoard.turn = opp_color
