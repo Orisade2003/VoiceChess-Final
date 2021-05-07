@@ -6,6 +6,7 @@ import pickle
 import traceback
 from twisted.internet.protocol import DatagramProtocol
 from Cryptodome.Cipher import AES
+from Cryptodome import Random
 
 from Cryptodome.Util.Padding import pad
 from Cryptodome.Util.Padding import unpad
@@ -63,17 +64,20 @@ class Network(DatagramProtocol):
                 """
 
     def Encrypt1(self, msg, key):
-        with open('iv.txt', 'rb') as c_file:
-            iv = c_file.read(16)
+        #with open('iv.txt', 'rb') as c_file:
+            #iv = c_file.read(16)
+        iv = Random.new().read(AES.block_size)
         cipher = AES.new(key, AES.MODE_CBC, iv)
         chiphertext = cipher.encrypt(pad(msg, AES.block_size))
         print(cipher.iv)
         print(chiphertext)
-        return chiphertext
+        return iv + chiphertext
 
     def Decrypt1(self,ciphertext, key):
-        with open("iv.txt", 'rb') as c_file:
-            iv = c_file.read(16)
+        #with open("iv.txt", 'rb') as c_file:
+            #iv = c_file.read(16)
+        iv = ciphertext[:16]
+        ciphertext = ciphertext[16:]
         cipher = AES.new(key, AES.MODE_CBC, iv)
         msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
         #print(msg)

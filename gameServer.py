@@ -8,6 +8,7 @@ import traceback
 import mysql.connector
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad
+from Cryptodome import Random
 from Cryptodome.Util.Padding import unpad
 key = b'mysecretpassword'
 
@@ -48,14 +49,15 @@ def Encrypt1(msg, key):
     :param key: the encryption key, bytes object
     :return: the function returns the encrypted msg asa a bytes object
     """
-    with open('iv.txt', 'rb') as c_file:
-        iv = c_file.read(16)
+    #with open('iv.txt', 'rb') as c_file:
+        #iv = c_file.read(16)
+    iv = Random.new().read(AES.block_size)
     cipher = AES.new(key,AES.MODE_CBC,iv)
     ciphertext = cipher.encrypt(pad(msg,AES.block_size))
     #print(cipher.iv)
     #print(ciphertext)
     #print(type(ciphertext))
-    return ciphertext
+    return iv + ciphertext
 
 def Decrypt1(ciphertext, key):
     """
@@ -64,8 +66,10 @@ def Decrypt1(ciphertext, key):
     :param key: thhe encryption key, bytes
     :return:  the function returns the decrypted msg , string
     """
-    with open("iv.txt", 'rb') as c_file:
-        iv = c_file.read(16)
+    #with open("iv.txt", 'rb') as c_file:
+        #iv = c_file.read(16)
+    iv = ciphertext[:16]
+    ciphertext= ciphertext[16:]
     cipher = AES.new(key, AES.MODE_CBC, iv)
     msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
     #print(msg)
