@@ -39,7 +39,7 @@ pefile==2019.4.18
 Pillow==7.2.0
 pop==14
 pop-config==6.10
-PyAudio @ file:PyAudio-0.2.11-cp37-cp37m-win32.whl
+PyAudio = 0.2.11
 pycparser==2.20
 pycryptodome==3.10.1
 pycryptodomex==3.10.1
