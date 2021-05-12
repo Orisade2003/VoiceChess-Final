@@ -33,7 +33,6 @@ pefile==2019.4.18
 Pillow==7.2.0
 pop==14
 pop-config==6.10
-PyAudio==0.2.11
 pycparser==2.20
 pycryptodome==3.10.1
 pycryptodomex==3.10.1
