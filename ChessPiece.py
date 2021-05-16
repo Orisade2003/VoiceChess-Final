@@ -229,7 +229,7 @@ class King(Piece):
         if c>0:
             p = board[r][c-1]
             if p==0:
-                add_moves.append((c-1,r-1))
+                add_moves.append((c-1,r))
             elif p.color != self.color:
                 add_moves.append((c - 1, r ))
 
