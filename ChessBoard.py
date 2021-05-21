@@ -341,7 +341,7 @@ class Board:
 
 
 
-    def piece_select2(self, col, row, color): #change col row order if doesnt work
+    def piece_select2(self, col, row, color):
         has_moved = False
         previous = (-1, -1)
         for r in range(self.rows):

@@ -118,7 +118,20 @@ def add_winner(winner):
 
     #UPDATE Users SET Wins = Wins + 1 WHERE
 
-
+def game_count(player1, player2):
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="io.pngxxwp7673G",
+        database="voicechessusersdb")
+    mycursor = mydb.cursor()
+    sql = "Update Users Set Games = Games + 1 WHERE Username = %s"
+    val = (player1,)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    val =(player2,)
+    mycursor.execute(sql,val)
+    mydb.commit()
 
 
 def SendData(con, msg):
@@ -186,11 +199,11 @@ def make_connection(con, game_num, isSpec = False):
 
         if color == "b":
             cBoard.is_full = True
-            cBoard.startTime = time.time()
+            cBoard.startTime = time.time() #time since Jan 1st 1970
 
 
         SendData(con,serilNum)
-        SendData(con,str(8081).encode())
+        SendData(con,str(voicechat_port).encode())
         voice_chat_ack = RecvData(con, 1024).decode()
 
         if voice_chat_ack != "ok":
@@ -238,9 +251,11 @@ def make_connection(con, game_num, isSpec = False):
                             if winner == "w":
                                 print("Her2e")
                                 add_winner(cBoard.player1_name)
+                                game_count(cBoard.player1_name, cBoard.player2_name)
                             elif winner == "b":
                                 print("here3")
                                 add_winner(cBoard.player2_name)
+                                game_count(cBoard.player1_name, cBoard.player2_name)
 
 
                         else:
@@ -266,22 +281,15 @@ def make_connection(con, game_num, isSpec = False):
                         cBoard.piece_select(col, row, color)
                         #print(col,row,color)
                         #print(cBoard.board)
-                    """if info.count("mark") > 0:
-                        data = info.split(" ")
-                        col = int(data[1])
-                        row = int(data[2])
-                        color = data[3]
-
-                        prev_piece = cBoard.board[row][col]
-
-                        cBoard.board[col][row].is_selected = True"""
                     if info == "b won":
                         cBoard.winner = "b"
                         print("black won")
                         add_winner(cBoard.player2_name)
+                        game_count(cBoard.player1_name, cBoard.player2_name)
                     if info =="w won":
                         cBoard.winner = "w"
                         add_winner(cBoard.player1_name)
+                        game_count(cBoard.player1_name, cBoard.player2_name)
                         print("white won")
                     if info == "vcport":
                         vcrequest_flag = True
