@@ -30,38 +30,7 @@ class Network(DatagramProtocol):
         self.add = (self.host, self.port)
         self.board = self.connect()
         self.board = pickle.loads(self.board)
-        """
-        chunk_size = 1024  # 512
-        audio_format = pyaudio.paInt16
-        channels = 1
-        rate = 20000
 
-        # initialise microphone recording
-        self.p = pyaudio.PyAudio()
-        self.playing_stream = self.p.open(format=audio_format, channels=channels, rate=rate, output=True,
-                                          frames_per_buffer=chunk_size)
-        self.recording_stream = self.p.open(format=audio_format, channels=channels, rate=rate, input=True,
-                                            frames_per_buffer=chunk_size)
-
-        receive_thread = threading.Thread(target=self.receive_server_data).start()
-        self.send_data_to_server()
-
-    def receive_server_data(self):
-        while True:
-            try:
-                data = self.s.recv(1024)
-                self.playing_stream.write(data)
-            except:
-                pass
-
-    def send_data_to_server(self):
-        while True:
-            try:
-                data = self.recording_stream.read(1024)
-                self.s.sendall(data)
-            except:
-                pass
-                """
 
     def Encrypt1(self, msg, key):
         #with open('iv.txt', 'rb') as c_file:

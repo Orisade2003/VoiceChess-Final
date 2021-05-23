@@ -218,7 +218,7 @@ def menu(wind, name):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 clean_up()
-                pygame.quit() ##remove display maybe
+                pygame.quit()
 
                 exit(0)
 
@@ -261,8 +261,8 @@ def draw_game_window(wind, cBoard, p1, p2, color, isReady):
         formatTime2 = formatTime2[:-1] + "0" + formatTime2[-1]
     font = pygame.font.SysFont("comicsans", 30)
     try:
-        rep1 = font.render(cBoard.player1_name + r"\'s time: " + str(formatTime2) ,1 ,(255,255,255))
-        rep2 = font.render(cBoard.player2_name + r"\'s time: "+ str(formatTime1),1, (255,255,255))
+        rep1 = font.render(cBoard.player1_name + r"\'s time: " + str(formatTime1) ,1 ,(255,255,255))
+        rep2 = font.render(cBoard.player2_name + r"\'s time: "+ str(formatTime2),1, (255,255,255))
     except Exception as e:
         print(e)
         print(2)
@@ -287,7 +287,7 @@ def draw_game_window(wind, cBoard, p1, p2, color, isReady):
             font = pygame.font.SysFont("comicsans", 30)
             rep = "You Are White!"
             show = font.render(rep, 1, (255, 0 ,0))
-            wind.blit(show, (width/2 - show.get_width()/2 + 50 , 10)) #remove plus 100
+            wind.blit(show, (width/2 - show.get_width()/2 + 50 , 10))
         elif color == "b":
             font = pygame.font.SysFont("comicsans", 30)
             rep = "You Are Black!"
@@ -325,8 +325,8 @@ def end_screen(wind, txt):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
 
-                #n.send("b won")
-                #print("trying here")
+
+
 
 
                 pygame.quit()
@@ -371,43 +371,6 @@ def connect():
 
 
 
-
-"""def game_event_handler(color):
-    while game_running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT and color !="s":
-                # quit()
-                if color == "w":
-                    n.send("b won")
-                    print("trying here")
-                    #clean_up()
-                elif color == "b":
-                    n.send("w won")
-                    print("trying here 2")
-                clean_up()
-                pygame.quit()
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q and color != "s":
-                    if color == "w":
-                        n.send("b won")
-                    elif color == "b":
-                        n.send("w won")
-
-                if event.key == pygame.K_RIGHT:
-                     n.send("forward")
-
-                if event.key == pygame.K_LEFT:
-                     n.send("back")
-
-            if event.type == pygame.MOUSEBUTTONDOWN and color != "s":
-                if color == cBoard.turn and cBoard.is_full:
-                    mouse_pos = pygame.mouse.get_pos()
-                    n.send("update moves")
-                    r, c = select(mouse_pos, color)
-                    n.send("select " + str(r) + " " + str(c) + " " + color)
-        time.sleep(0.1)
-"""
 
 def get_empty(board):
     """
@@ -469,45 +432,6 @@ def event_handler(color):
 
                             n.send(f"move_piece {color} {str(Globals.selected.row)} {str(Globals.selected.col)} {str(r)} {str(c)}")
                             Globals.selected = None
-                            #n.send("select " + str(selected.row) + " " + str(selected.col) + " " + color)
-                            #n.send("select " + str(r) + " " + str(c) + " " + color)
-
-                """print("is piece selected?", cBoard.piece_selected)
-                if not cBoard.piece_selected:
-                    print("piece selected/ ", cBoard.piece_selected)
-                    if cBoard.board[c][r] != 0 and cBoard.board[c][r].color == color:
-                        
-                        cBoard.piece_selected = cBoard.board[c][r]
-                        n.send("select " + str(r) + " " + str(c) + " " + color)
-                        print("sent")
-                        print("piece selected2 is", cBoard.piece_selected)
-                        n.send("piece")
-                        ctr += 1
-                elif ctr >0:
-                    print("sent here")
-                    #ctr2+=1
-                    #ctr = 0
-                    #ctr2 = 0
-
-                    in_moves = (c,r) in cBoard.piece_selected.moves
-                    if (in_moves) or ( cBoard.board[c][r] != 0 and cBoard.board[c][r].color == color):
-                        n.send("select " + str(r) + " " + str(c) + " " + color)
-                        if in_moves:
-                            n.send("has played")
-                        else:
-                            n.send("piece")
-                            
-
-
-
-
-                    ctr = 0
-
-"""
-
-
-                #if not r not in range(8) or c not in range(8):
-                 #   r,c = get_empty(cBoard.board)
 
 
 
@@ -549,8 +473,8 @@ def main_logic():
                 #vcclient.dele()
             except:
                 print(traceback.print_exc())
-            #time.sleep(5)
-            #menu(wind,name)
+
+
             n.disconnect()
             clean_up()
 
