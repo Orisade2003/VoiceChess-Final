@@ -261,8 +261,8 @@ def draw_game_window(wind, cBoard, p1, p2, color, isReady):
         formatTime2 = formatTime2[:-1] + "0" + formatTime2[-1]
     font = pygame.font.SysFont("comicsans", 30)
     try:
-        rep1 = font.render(cBoard.player1_name + r"\'s time: " + str(formatTime2) ,1 ,(255,255,255))
-        rep2 = font.render(cBoard.player2_name + r"\'s time: "+ str(formatTime1),1, (255,255,255))
+        rep1 = font.render(cBoard.player1_name + r"\'s time: " + str(formatTime1) ,1 ,(255,255,255))
+        rep2 = font.render(cBoard.player2_name + r"\'s time: "+ str(formatTime2),1, (255,255,255))
     except Exception as e:
         print(e)
         print(2)
