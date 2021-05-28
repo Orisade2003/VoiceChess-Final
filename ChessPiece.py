@@ -3,22 +3,26 @@ import os
 import traceback
 import Globals
 
-b_bishop = pygame.image.load(os.path.join("img", "black_bishop.png"))
-b_king = pygame.image.load(os.path.join("img", "black_king.png"))
-b_knight = pygame.image.load(os.path.join("img", "black_knight.png"))
-b_pawn = pygame.image.load(os.path.join("img", "black_pawn.png"))
-b_queen = pygame.image.load(os.path.join("img", "black_queen.png"))
-b_rook = pygame.image.load(os.path.join("img", "black_rook.png"))
 
-w_bishop = pygame.image.load(os.path.join("img", "white_bishop.png"))
-w_king = pygame.image.load(os.path.join("img", "white_king.png"))
-w_knight = pygame.image.load(os.path.join("img", "white_knight.png"))
-w_pawn = pygame.image.load(os.path.join("img", "white_pawn.png"))
-w_queen = pygame.image.load(os.path.join("img", "white_queen.png"))
-w_rook = pygame.image.load(os.path.join("img", "white_rook.png"))
+wbishop = pygame.image.load(os.path.join("img", "white_bishop.png"))
+wking = pygame.image.load(os.path.join("img", "white_king.png"))
+wknight = pygame.image.load(os.path.join("img", "white_knight.png"))
+wpawn = pygame.image.load(os.path.join("img", "white_pawn.png"))
+wqueen = pygame.image.load(os.path.join("img", "white_queen.png"))
+wrook = pygame.image.load(os.path.join("img", "white_rook.png"))
 
-b = [b_bishop, b_king, b_knight, b_pawn, b_queen, b_rook]
-w = [w_bishop, w_king, w_knight, w_pawn, w_queen, w_rook]
+
+bbishop = pygame.image.load(os.path.join("img", "black_bishop.png"))
+bking = pygame.image.load(os.path.join("img", "black_king.png"))
+bknight = pygame.image.load(os.path.join("img", "black_knight.png"))
+bpawn = pygame.image.load(os.path.join("img", "black_pawn.png"))
+bqueen = pygame.image.load(os.path.join("img", "black_queen.png"))
+brook = pygame.image.load(os.path.join("img", "black_rook.png"))
+
+
+
+b = [bbishop, bking, bknight, bpawn, bqueen, brook]
+w = [wbishop, wking, wknight, wpawn, wqueen, wrook]
 Black_Pieces=[]
 White_Pieces=[]
 
@@ -49,18 +53,21 @@ class Piece:
         self.has_moved = False
         self.is_rook = False
 
-    def isSelected(self):
-        return self.is_selected
 
-    def get_moves(self, board):
-        try:
-            self.moves= self.get_valid_moves(board)
-        except Exception as e:
-            print(e)
-            print(traceback.print_exc())
+    def get_pixels(self, row, col,):
+
+        if self.color == "w":
+            y, x = row, col
+
+        else:
+            y, x = (7 - row, 7 - col)
 
 
-    def draw(self,win,color, player="w", selected=None):
+        xx = (4 - x) + round(self.rect[0] + (x * self.rect[2] / 8))
+        yy = 3 + round(self.startY + (y * self.rect[3] / 8))
+        return xx+32, yy+30
+
+    def draw(self,win,color, player="w", selected=None, save_moves = None, is_checked = False):
         if self.color =="w":
             this = White_Pieces[self.img]
         else:
@@ -76,27 +83,131 @@ class Piece:
         x = (4 - newcol) + round(self.startX + (newcol * self.rect[2] / 8))
         y = 3 + round(self.startY + (newrow * self.rect[3] / 8))
 
-        if selected and str(self) == str(selected) and self.color == color:    #self == selected and self.color == color:
+        if selected and str(self) == str(selected) and self.color == color:
             pygame.draw.rect(win, (255, 0, 0), (x, y, 62, 62), 4)
+
+            if not is_checked:
+                for move in self.moves:
+                        xx1, yy1 = self.get_pixels(move[0],move[1])
+                        pygame.draw.circle(win, (0, 255, 255), (yy1,xx1 ), 10, 10)
+            else:
+                for move in self.moves:
+                    if move in save_moves:
+                        xx1, yy1 = self.get_pixels(move[0], move[1])
+                        pygame.draw.circle(win, (0, 255, 255), (yy1, xx1), 10, 10)
+
+
+
+
 
         win.blit(this,(x,y))
 
+    def isSelected(self):
+        return self.is_selected
 
-
-
-
-    def move_to_pos(self,pos):
+    def move_to_pos(self, pos):
         try:
             print(self.row, self.col, " this is the current pos")
-            self.row=pos[0]
-            self.col=pos[1]
-            print(self.row,self.col, 2222222)
+            self.row = pos[0]
+            self.col = pos[1]
         except Exception as e:
             print(e)
             print(traceback.print_exc())
 
+
+
+    def get_moves(self, board):
+        try:
+            self.moves = self.get_valid_moves(board)
+        except Exception as e:
+            print(e)
+            print(traceback.print_exc())
+
+
+
+
     def __str__(self):
         return str(self.row) + ' ' + str(self.col)
+
+
+
+class Knight(Piece):
+
+    img = 2
+
+    def get_valid_moves(self,board):
+        r = self.row
+        c = self.col
+        add_moves=[]
+
+        #down left
+        if r < 6 and c > 0:
+            p = board[r+2][c-1]
+            if p == 0:
+                add_moves.append((c-1,r+2))
+            elif self.color != p.color:
+                add_moves.append((c - 1, r + 2))
+            p = board[r + 2][c - 1]
+
+        #down right
+        if r<6 and c<7:
+            p=board[r+2][c+1]
+            if p ==0:
+                add_moves.append((c+1,r+2))
+            elif self.color != p.color:
+                add_moves.append((c+1,r+2))
+
+         #up left
+        if r > 1 and c > 0:
+             p=board[r-2][c-1]
+             if p == 0:
+                 add_moves.append((c-1,r-2))
+             elif p.color != self.color:
+                 add_moves.append((c - 1, r - 2))
+
+        #up right
+        if r > 1 and c < 7:
+            p=board[r-2][c+1]
+            if p == 0:
+                add_moves.append((c+1,r-2))
+            elif self.color != p.color:
+                add_moves.append((c + 1, r - 2))
+
+        #left - up
+        if c > 1 and r > 0:
+            p=board[r-1][c-2]
+            if p == 0:
+                add_moves.append((c-2,r-1))
+            elif self.color != p.color:
+                add_moves.append((c-2,r-1))
+
+        #right-up
+        if c < 6 and r > 0:
+            p=board[r-1][c+2]
+            if p == 0:
+                add_moves.append((c+2,r-1))
+            elif self.color != p.color:
+                add_moves.append((c+2,r-1))
+
+        #left-down
+        if c > 1 and r < 7:
+            p=board[r+1][c-2]
+            if p == 0:
+                add_moves.append((c-2,r+1))
+            elif self.color != p.color:
+                add_moves.append((c-2,r+1))
+        #right - down
+        if c < 6 and r < 7:
+            p=board[r+1][c+2]
+            if p == 0:
+                add_moves.append((c+2,r+1))
+            elif self.color !=  p.color:
+                add_moves.append((c+2,r+1))
+
+        return add_moves
+
+
+
 
 
 class Bishop(Piece):
@@ -243,154 +354,8 @@ class King(Piece):
 
         return add_moves
 
-class Knight(Piece):
 
-    img = 2
 
-    def get_valid_moves(self,board):
-        r = self.row
-        c = self.col
-        add_moves=[]
-
-        #down left
-        if r < 6 and c > 0:
-            p = board[r+2][c-1]
-            if p == 0:
-                add_moves.append((c-1,r+2))
-            elif self.color != p.color:
-                add_moves.append((c - 1, r + 2))
-            p = board[r + 2][c - 1]
-
-        #down right
-        if r<6 and c<7:
-            p=board[r+2][c+1]
-            if p ==0:
-                add_moves.append((c+1,r+2))
-            elif self.color != p.color:
-                add_moves.append((c+1,r+2))
-
-         #up left
-        if r > 1 and c > 0:
-             p=board[r-2][c-1]
-             if p == 0:
-                 add_moves.append((c-1,r-2))
-             elif p.color != self.color:
-                 add_moves.append((c - 1, r - 2))
-
-        #up right
-        if r > 1 and c < 7:
-            p=board[r-2][c+1]
-            if p == 0:
-                add_moves.append((c+1,r-2))
-            elif self.color != p.color:
-                add_moves.append((c + 1, r - 2))
-
-        #left - up
-        if c > 1 and r > 0:
-            p=board[r-1][c-2]
-            if p == 0:
-                add_moves.append((c-2,r-1))
-            elif self.color != p.color:
-                add_moves.append((c-2,r-1))
-
-        #right-up
-        if c < 6 and r > 0:
-            p=board[r-1][c+2]
-            if p == 0:
-                add_moves.append((c+2,r-1))
-            elif self.color != p.color:
-                add_moves.append((c+2,r-1))
-
-        #left-down
-        if c > 1 and r < 7:
-            p=board[r+1][c-2]
-            if p == 0:
-                add_moves.append((c-2,r+1))
-            elif self.color != p.color:
-                add_moves.append((c-2,r+1))
-        #right - down
-        if c < 6 and r < 7:
-            p=board[r+1][c+2]
-            if p == 0:
-                add_moves.append((c+2,r+1))
-            elif self.color !=  p.color:
-                add_moves.append((c+2,r+1))
-
-        return add_moves
-
-class Pawn(Piece):
-    img = 3
-
-    def __init__(self, row, col, color):
-        super().__init__(row,col,color)
-        self.is_pawn = True
-        self.is_queen = False
-        self.is_first = True
-
-    def get_valid_moves(self, board):
-        r= self.row
-        c=self.col
-        add_moves=[]
-        # straight
-        try:
-            if self.color == "b":
-                if r < 7:
-                    p = board[r+1][c]
-                    if p == 0:
-                        add_moves.append((c,r+1))
-                    #diagonal
-                    if c < 7:
-                        p = board[r+1][c+1]
-                        if p !=0:
-                            if p.color != self.color:
-                                add_moves.append((c+1,r+1))
-
-                    if c > 0:
-                        p=board[r+1][c-1]
-                        if p!=0:
-                            if p.color != self.color:
-                                add_moves.append((c-1,r+1))
-                if self.is_first:
-                    if r < 6:
-                        if r <6:
-                            p=board[r+2][c]
-                            if p == 0:
-                                if board[r+1][c] == 0:
-                                    add_moves.append((c,r+2))
-                            elif self.color != p.color:
-                                add_moves.append((c,r+2))
-            # white moves
-
-            else:
-                if r > 0:
-                    p=board[r-1][c]
-                    if p == 0:
-                        add_moves.append((c,r-1))
-                if c < 7:
-                    p=board[r-1][c+1]
-                    if p != 0:
-                        if p.color != self.color:
-                            add_moves.append((c+1,r-1))
-                if c > 0:
-                    p=board[r-1][c-1]
-                    if p != 0:
-                        if self.color !=p.color:
-                            add_moves.append((c-1,r-1))
-
-                if self.is_first:
-                    if r > 1:
-                        p=board[r-2][c]
-                        if p == 0:
-                            if board[r-1][c] == 0:
-                                add_moves.append((c,r-2))
-                        elif self.color != p.color:
-                            add_moves.append((c,r-2))
-        except Exception as e:
-            print(e)
-            print(traceback.format_exc())
-            print("hereitis")
-
-        return add_moves
 
 
 class Queen(Piece):
@@ -462,7 +427,7 @@ class Queen(Piece):
              bottom_col -= 1
 
 
-             #changed here
+
              bottom_col -=1
          bottom_col = c - 1
          above_col = c + 1
@@ -510,7 +475,12 @@ class Queen(Piece):
                  break
              else:
                  break
-
+         illegal_pos = (self.col-3, self.row+2)
+         illegal_pos2 = (self.col-5,self.row + 3)
+         if illegal_pos in add_moves:
+             add_moves.remove(illegal_pos)
+         if illegal_pos2 in add_moves:
+             add_moves.remove(illegal_pos2)
          return add_moves
 
 
@@ -573,7 +543,79 @@ class Rook(Piece):
 
 
 
+class Pawn(Piece):
+    img = 3
 
+    def __init__(self, row, col, color):
+        super().__init__(row,col,color)
+        self.is_pawn = True
+        self.is_queen = False
+        self.is_first = True
+
+    def get_valid_moves(self, board):
+        r= self.row
+        c=self.col
+        add_moves=[]
+        # straight
+        try:
+            if self.color == "b":
+                if r < 7:
+                    p = board[r+1][c]
+                    if p == 0:
+                        add_moves.append((c,r+1))
+                    #diagonal
+                    if c < 7:
+                        p = board[r+1][c+1]
+                        if p !=0:
+                            if p.color != self.color:
+                                add_moves.append((c+1,r+1))
+
+                    if c > 0:
+                        p=board[r+1][c-1]
+                        if p!=0:
+                            if p.color != self.color:
+                                add_moves.append((c-1,r+1))
+                if self.is_first:
+                    if r < 6:
+                        if r <6:
+                            p=board[r+2][c]
+                            if p == 0:
+                                if board[r+1][c] == 0:
+                                    add_moves.append((c,r+2))
+                            #elif self.color != p.color:
+                                #add_moves.append((c,r+2))
+            # white moves
+
+            else:
+                if r > 0:
+                    p=board[r-1][c]
+                    if p == 0:
+                        add_moves.append((c,r-1))
+                if c < 7:
+                    p=board[r-1][c+1]
+                    if p != 0:
+                        if p.color != self.color:
+                            add_moves.append((c+1,r-1))
+                if c > 0:
+                    p=board[r-1][c-1]
+                    if p != 0:
+                        if self.color !=p.color:
+                            add_moves.append((c-1,r-1))
+
+                if self.is_first:
+                    if r > 1:
+                        p=board[r-2][c]
+                        if p == 0:
+                            if board[r-1][c] == 0:
+                                add_moves.append((c,r-2))
+                        elif self.color != p.color:
+                            add_moves.append((c,r-2))
+        except Exception as e:
+            print(e)
+            print(traceback.format_exc())
+
+
+        return add_moves
 
 
 

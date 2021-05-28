@@ -49,14 +49,9 @@ def Encrypt1(msg, key):
     :param key: the encryption key, bytes object
     :return: the function returns the encrypted msg asa a bytes object
     """
-    #with open('iv.txt', 'rb') as c_file:
-        #iv = c_file.read(16)
     iv = Random.new().read(AES.block_size)
     cipher = AES.new(key,AES.MODE_CBC,iv)
     ciphertext = cipher.encrypt(pad(msg,AES.block_size))
-    #print(cipher.iv)
-    #print(ciphertext)
-    #print(type(ciphertext))
     return iv + ciphertext
 
 def Decrypt1(ciphertext, key):
@@ -66,13 +61,10 @@ def Decrypt1(ciphertext, key):
     :param key: thhe encryption key, bytes
     :return:  the function returns the decrypted msg , string
     """
-    #with open("iv.txt", 'rb') as c_file:
-        #iv = c_file.read(16)
     iv = ciphertext[:16]
     ciphertext= ciphertext[16:]
     cipher = AES.new(key, AES.MODE_CBC, iv)
     msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
-    #print(msg)
     return msg
 
 
@@ -83,7 +75,6 @@ def Encrypt(msg, key):
         chnum = ch  # - ord('a')
         chnum += key
         chnum %= 256
-        # chnum %= 26
         crypt += chnum.to_bytes(1, byteorder="big")  # + #ord('a'))
     return crypt
 
@@ -119,6 +110,11 @@ def add_winner(winner):
     #UPDATE Users SET Wins = Wins + 1 WHERE
 
 def game_count(player1, player2):
+    """
+    :param player1: the name of one of the players
+    :param player2: the name of the other player
+    the function adds 1 to the Games column in data base for each  one of the two players
+    """
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -194,7 +190,6 @@ def make_connection(con, game_num, isSpec = False):
         else:
             color = "b"
         cBoard.start_user = color
-        print(color)
         serilNum = pickle.dumps(cBoard)
 
         if color == "b":
@@ -249,11 +244,9 @@ def make_connection(con, game_num, isSpec = False):
                             cBoard.winner = color
                             winner = cBoard.winner
                             if winner == "w":
-                                print("Her2e")
                                 add_winner(cBoard.player1_name)
                                 game_count(cBoard.player1_name, cBoard.player2_name)
                             elif winner == "b":
-                                print("here3")
                                 add_winner(cBoard.player2_name)
                                 game_count(cBoard.player1_name, cBoard.player2_name)
 
@@ -265,22 +258,14 @@ def make_connection(con, game_num, isSpec = False):
 
 
 
-
-
-
-
-
-
                     if info.count("select") > 0:
                         data = info.split(" ")
                         print(data)
-                        col = int(data[1])# switch to col = int(data[1])
-                        row = int(data[2])#switch to  row = int(data[2])
+                        col = int(data[1])
+                        row = int(data[2])
                         color = data[3]
                         print("this is rowcol", row,col)
                         cBoard.piece_select(col, row, color)
-                        #print(col,row,color)
-                        #print(cBoard.board)
                     if info == "b won":
                         cBoard.winner = "b"
                         print("black won")
@@ -335,21 +320,13 @@ def make_connection(con, game_num, isSpec = False):
                             if room != -1:
                                 voicechat_port = FIRST_VC_PORT + room
 
-                        # print("herehere")
-                        # if times_in_dictlist(conn_list, room):
-                        # vcs = threading.Thread(target=VCServer, args=(voicechat_port))
-                        # vcslist.append(vcs)
-                        # vcslist[-1].start()
-                        # temp_port = int(voicechat_port)
-                        # voicechat_port =str(temp_port+1)
-                        # print("The port here is type", type(voicechat_port))
 
                     srl = pickle.dumps(voicechat_port)
                     SendData(con, srl)
-                    # go over conlist and
 
 
-                            #voicechat_port = c[]
+
+
                     vcrequest_flag = False
                 else:
                     SendData(con, all_data)
@@ -369,12 +346,6 @@ def make_connection(con, game_num, isSpec = False):
 
 
 
-                """ for c in conn_list:
-                    if c["room"] == con_room:
-                        c["con"].sendall("you won".encode())
-                        print("you won sent")"""
-
-
 
 
 
@@ -385,7 +356,7 @@ def make_connection(con, game_num, isSpec = False):
 
             except Exception as e:
                 print(traceback.format_exc())
-                print(3)
+
         conn_ctr -= 1
         try:
             del room_dict[game_num]
@@ -436,18 +407,6 @@ def make_connection(con, game_num, isSpec = False):
     spec_ctr -= 1
     con.close()
 
-"""def broadcast(self, sock, data):
-    for client in self.connections:
-        if client != self.s and client != sock:
-            try:
-                client.send(data)
-            except:
-                pass"""
-
-
-
-
-
 
 def spec_read():
     global specs
@@ -466,7 +425,7 @@ class Room:
     def __init__(self, p1, p2):
         self.p1 = p1
         self.p2 = p2
-       # self.server = Server((p1,p2))
+
     def __str__(self):
         s = "These are the players in the room" + (self.p1,self.p2)
 
@@ -570,26 +529,17 @@ try:
 except:
     print(traceback.print_exc())
 
-#start_new_thread(VCServer, (8081,))
+
 while True:
     try:
-        #spec_read()
+
 
         if conn_ctr < MAX_ROOMS:
             (con,addr) = s.accept()
             conn_list.append({"id": uid_counter, "con": con, "addr": addr, "room": -1, "color": None})
             uid_counter += 1
-            #player = (con,addr)
-            #temp = temp.append(player)
-            """if type(temp) is list:
-               if len(temp) % 2 == 0:
-                    r = Room((temp[0]),(temp[1]))
-                    server = Server((temp[0],temp[1]))
-                    Rooms.append(r)
-                    temp = []
-                    print("THESE ARE THE CURRENNT ROOMS", Rooms)
-            """
-            #is_spec = False
+
+
             first_available_room = -1
             print("New connection made")
 
@@ -602,13 +552,13 @@ while True:
                 first_available_room = len(room_dict.keys())
                 room_dict[first_available_room] = Board(8, 8)
             conn_list[-1]["room"] = first_available_room
-            #conn_list[-1]["color"]
+
 
 
         print("There are: " + str(conn_ctr + 1) + " current connections")
         print("There are: " + str(len(room_dict)) + "current games going on")
         start_new_thread(make_connection, (con, first_available_room, False))
-        #start_new_thread(Server)
+
 
 
 

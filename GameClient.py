@@ -30,42 +30,9 @@ class Network(DatagramProtocol):
         self.add = (self.host, self.port)
         self.board = self.connect()
         self.board = pickle.loads(self.board)
-        """
-        chunk_size = 1024  # 512
-        audio_format = pyaudio.paInt16
-        channels = 1
-        rate = 20000
 
-        # initialise microphone recording
-        self.p = pyaudio.PyAudio()
-        self.playing_stream = self.p.open(format=audio_format, channels=channels, rate=rate, output=True,
-                                          frames_per_buffer=chunk_size)
-        self.recording_stream = self.p.open(format=audio_format, channels=channels, rate=rate, input=True,
-                                            frames_per_buffer=chunk_size)
-
-        receive_thread = threading.Thread(target=self.receive_server_data).start()
-        self.send_data_to_server()
-
-    def receive_server_data(self):
-        while True:
-            try:
-                data = self.s.recv(1024)
-                self.playing_stream.write(data)
-            except:
-                pass
-
-    def send_data_to_server(self):
-        while True:
-            try:
-                data = self.recording_stream.read(1024)
-                self.s.sendall(data)
-            except:
-                pass
-                """
 
     def Encrypt1(self, msg, key):
-        #with open('iv.txt', 'rb') as c_file:
-            #iv = c_file.read(16)
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(key, AES.MODE_CBC, iv)
         chiphertext = cipher.encrypt(pad(msg, AES.block_size))
@@ -74,8 +41,6 @@ class Network(DatagramProtocol):
         return iv + chiphertext
 
     def Decrypt1(self,ciphertext, key):
-        #with open("iv.txt", 'rb') as c_file:
-            #iv = c_file.read(16)
         iv = ciphertext[:16]
         ciphertext = ciphertext[16:]
         cipher = AES.new(key, AES.MODE_CBC, iv)
@@ -145,15 +110,4 @@ class Network(DatagramProtocol):
 
             return info
 
-    """def recv(self, data):
-        try:
-            data = self.client.recv(2048 * 2)
-        except Exception as e:
-            print("Error in game client ", e)
-            exit()
 
-        print(type(data))
-        if type(data) is bytes or type(data) is bytearray:
-            return data.decode()
-        else:
-            return pickle.loads(data)"""
