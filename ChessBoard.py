@@ -17,6 +17,7 @@ class Board:
     COLUMNS=8
     rect = (113, 113, 525, 525)
     startX = rect[0]
+    save_moves=[]
     startY = rect[1]
     f=[]
     def __init__(self, rows, cols):
@@ -115,15 +116,18 @@ class Board:
             yy1 = 3 + round(self.startY + (y1 * self.rect[3] / 8))
             pygame.draw.circle(win, (0, 0, 255), (xx1 + 32, yy1 + 30), 34, 4)
 
+
             t = ()
 
         for r in range(self.rows):
             for c in range(self.cols):
                 p = self.board[r][c]
                 if type(p) != int:
-                    p.draw(win, color, player, selected)
+                    p.draw(win, color, player, selected, [], self.checked(color))
                     if self.board[r][c].is_selected:
                         t = (r, c)
+
+
 
     def get_all_moves(self):
         """
@@ -133,6 +137,35 @@ class Board:
             for c in range(self.cols):
                 if self.board[r][c] != 0:
                     self.board[r][c].get_moves(board=self.board)
+
+
+
+
+    def get_save(self, color):
+        new_board = deepcopy(self)
+        boardlist = new_board.board
+        print(boardlist)
+        for col in range(len(boardlist)):
+            for row in range(len(boardlist[col])):
+                if type(new_board.board[col][row]) == int:
+                    continue
+                if not new_board.board[col][row].color == color:
+                    continue
+
+                p = new_board.board[col][row]
+                all_moves = p.get_valid_moves(boardlist)
+                self.save_moves = []
+                for t in all_moves:
+                  boardlist[t[0]][t[1]] = boardlist[col][row]
+                  temp = boardlist[t[1]][t[0]]
+                  if not new_board.checked(color):
+                      self.save_moves.append((t[1],t[0]))
+                      boardlist[col][row] = boardlist[t[1]][t[0]]
+                      boardlist[t[1]][t[0]]= temp
+
+
+        return self.save_moves
+
 
     def get_kills(self, color):
         """
@@ -144,7 +177,7 @@ class Board:
             for c in range(self.cols):
                 if self.board[r][c] != 0:
                     if self.board[r][c].color != color:
-                        for move in self.board[r][c].moves:# was .moves before
+                        for move in self.board[r][c].moves:
                             kills.append(move)
         return kills
 
@@ -163,13 +196,11 @@ class Board:
             for c in range(self.cols):
                 if self.board[r][c] != 0:
                     if type(self.board[r][c]) is King and self.board[r][c].color == color:
-                        king_pos = (c, r)#was c,r
+                        king_pos = (c, r)
         if king_pos in kills:
-            print("point of no return", king_pos)
             self.f.append(king_pos)
             return True
         return False
-
 
 
 
@@ -182,10 +213,6 @@ class Board:
                 if self.board[r][c] != 0:
                     self.board[r][c].is_selected = False
         self.piece_selected = False
-
-
-
-
 
 
 
@@ -204,7 +231,7 @@ class Board:
         has_moved = True
         nBoard = self.board[:]
         
-        if nBoard[start[0]][start[1]].is_pawn:
+        if type(nBoard[start[0]][start[1]])!= int and nBoard[start[0]][start[1]].is_pawn:
             isfirst = nBoard[start[0]][start[1]].is_first
             nBoard[start[0]][start[1]].is_first = False
 
@@ -262,12 +289,11 @@ class Board:
                     
                 p = boardlist[col][row]
                 all_moves = p.get_valid_moves(boardlist)
-
+                self.save_moves = []
                 for t in all_moves:
                     if new_board.move((col, row), (t[1],t[0]), color):
                         print("this is where the checkm happens", t, type(p), p.color,(col,row))
-                        print(p.moves)
-
+                        self.save_moves.append((t[1],t[0]))
                         return False
         return True
         

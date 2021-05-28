@@ -54,12 +54,14 @@ def install_requirements():
             print("Pygame installed successfully")
 
         except Exception as e:
-            print("Seems like print ins't installed on the system' trying to install pip")
+            print("Seems like pip ins't installed on the system' trying to install pip")
             imp_pip.main()
             print("Pip installed, trying to download pygame")
         try:
             import pip
             install("pygame")
+            install("Pyaudio")
+
             print("pygame has been successfully installed")
         except Exception as e:
             print(e)
@@ -70,7 +72,7 @@ def init_board():
     global board, chessbg, rect, t
     pygame.font.init()
     board = pygame.transform.scale(pygame.image.load(os.path.join("img", "board_alt.png")), (750, 750))
-    chessbg = pygame.image.load(os.path.join("img", "ChessKingBG2.png")) #"chessbg.png"
+    chessbg = pygame.image.load(os.path.join("img", "ChessKingBG2.png"))
     rect = (113, 113, 525, 525)
     t = "w"
 
@@ -107,7 +109,7 @@ class VCClient:
         """
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.target_ip = "127.0.0.1" #was 10.100.102.6
+            self.target_ip = "localhost" #was 10.100.102.6
             self.target_port = int(port)
             self.voicechat_running = True
             print(self.target_port)
@@ -118,7 +120,6 @@ class VCClient:
             except Exception as e:
                 print(e)
                 print(traceback.print_exc())
-                print("we are stuck")
 
 
         except:
@@ -172,17 +173,13 @@ class VCClient:
         """
         deletes the instance of the object
         """
-        #self.s.shutdown()
         print("called")
         self.voicechat_running = False
-      #  raise Exception(self.recv_thread)
         self.recv_thread.join()
-       # self.send_thread.raise_exception()
         self.send_thread.join()
         self.s.close()
         self.playing_stream.close()
         self.recording_stream.close()
-        #self.p.close()
 
         print("voice chat has shut down")
 
@@ -265,7 +262,7 @@ def draw_game_window(wind, cBoard, p1, p2, color, isReady):
         rep2 = font.render(cBoard.player2_name + r"\'s time: "+ str(formatTime2),1, (255,255,255))
     except Exception as e:
         print(e)
-        print(2)
+
 
     wind.blit(rep1 ,( 520,10))
     wind.blit(rep2 , (520, 700))
@@ -400,7 +397,7 @@ def event_handler(color):
                 n.send("b won")
             elif color == "b":
                 n.send("w won")
-            # quit()
+
             clean_up()
             pygame.quit()
 
@@ -439,14 +436,14 @@ def event_handler(color):
 data = None
 def main_logic():
     """
-    :return: the function is in charge of the main logic on the client side, such as deciding what to tsend to the server and when
+     the function is in charge of the main logic on the client side, such as deciding what to send to the server and when
     """
     global name, t, cBoard, vcclient, n, data
     color = cBoard.start_user
     ct = 0
     print(n)
     voicechat_port = n.send("vcport")
-#    print(n.server)
+
 
     vcclient = VCClient(voicechat_port)
     cBoard = n.send("update_moves")
@@ -455,7 +452,6 @@ def main_logic():
 
     clock = pygame.time.Clock()
 
-    #threading.Thread(target=game_event_handler, args=(color)).start()
     n.send("ready")
     while game_running: # main loop
         event_handler(color)
@@ -466,11 +462,11 @@ def main_logic():
                 end_screen(wind,"Black Won")
             try:
                 if pygame.event.get() == pygame.KEYDOWN and pygame.event.get().key == pygame.K_f:
-                    #menu(wind,name)
+
                     menu(wind=wind, name=name)
                     n.disconnect()
                 clean_up()
-                #vcclient.dele()
+
             except:
                 print(traceback.print_exc())
 
@@ -502,7 +498,7 @@ def main_logic():
 
         time.sleep(0.1)
 
-      #data = n.recv(data)
+
     n.disconnect()
 
 

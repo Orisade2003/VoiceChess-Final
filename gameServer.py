@@ -49,14 +49,9 @@ def Encrypt1(msg, key):
     :param key: the encryption key, bytes object
     :return: the function returns the encrypted msg asa a bytes object
     """
-    #with open('iv.txt', 'rb') as c_file:
-        #iv = c_file.read(16)
     iv = Random.new().read(AES.block_size)
     cipher = AES.new(key,AES.MODE_CBC,iv)
     ciphertext = cipher.encrypt(pad(msg,AES.block_size))
-    #print(cipher.iv)
-    #print(ciphertext)
-    #print(type(ciphertext))
     return iv + ciphertext
 
 def Decrypt1(ciphertext, key):
@@ -66,13 +61,10 @@ def Decrypt1(ciphertext, key):
     :param key: thhe encryption key, bytes
     :return:  the function returns the decrypted msg , string
     """
-    #with open("iv.txt", 'rb') as c_file:
-        #iv = c_file.read(16)
     iv = ciphertext[:16]
     ciphertext= ciphertext[16:]
     cipher = AES.new(key, AES.MODE_CBC, iv)
     msg = unpad(cipher.decrypt(ciphertext), AES.block_size)
-    #print(msg)
     return msg
 
 
@@ -83,7 +75,6 @@ def Encrypt(msg, key):
         chnum = ch  # - ord('a')
         chnum += key
         chnum %= 256
-        # chnum %= 26
         crypt += chnum.to_bytes(1, byteorder="big")  # + #ord('a'))
     return crypt
 
@@ -122,7 +113,7 @@ def game_count(player1, player2):
     """
     :param player1: the name of one of the players
     :param player2: the name of the other player
-    the unction adds 1 to the Games column in data base for each  one of the two players
+    the function adds 1 to the Games column in data base for each  one of the two players
     """
     mydb = mysql.connector.connect(
         host="localhost",
@@ -199,7 +190,6 @@ def make_connection(con, game_num, isSpec = False):
         else:
             color = "b"
         cBoard.start_user = color
-        print(color)
         serilNum = pickle.dumps(cBoard)
 
         if color == "b":
@@ -254,23 +244,15 @@ def make_connection(con, game_num, isSpec = False):
                             cBoard.winner = color
                             winner = cBoard.winner
                             if winner == "w":
-                                print("Her2e")
                                 add_winner(cBoard.player1_name)
                                 game_count(cBoard.player1_name, cBoard.player2_name)
                             elif winner == "b":
-                                print("here3")
                                 add_winner(cBoard.player2_name)
                                 game_count(cBoard.player1_name, cBoard.player2_name)
 
 
                         else:
                             cBoard.turn = opp_color
-
-
-
-
-
-
 
 
 
@@ -284,8 +266,6 @@ def make_connection(con, game_num, isSpec = False):
                         color = data[3]
                         print("this is rowcol", row,col)
                         cBoard.piece_select(col, row, color)
-                        #print(col,row,color)
-                        #print(cBoard.board)
                     if info == "b won":
                         cBoard.winner = "b"
                         print("black won")
@@ -343,10 +323,10 @@ def make_connection(con, game_num, isSpec = False):
 
                     srl = pickle.dumps(voicechat_port)
                     SendData(con, srl)
-                    # go over conlist and
 
 
-                            #voicechat_port = c[]
+
+
                     vcrequest_flag = False
                 else:
                     SendData(con, all_data)
@@ -376,7 +356,7 @@ def make_connection(con, game_num, isSpec = False):
 
             except Exception as e:
                 print(traceback.format_exc())
-                print(3)
+
         conn_ctr -= 1
         try:
             del room_dict[game_num]
@@ -445,7 +425,7 @@ class Room:
     def __init__(self, p1, p2):
         self.p1 = p1
         self.p2 = p2
-       # self.server = Server((p1,p2))
+
     def __str__(self):
         s = "These are the players in the room" + (self.p1,self.p2)
 
@@ -549,17 +529,17 @@ try:
 except:
     print(traceback.print_exc())
 
-#start_new_thread(VCServer, (8081,))
+
 while True:
     try:
-        #spec_read()
+
 
         if conn_ctr < MAX_ROOMS:
             (con,addr) = s.accept()
             conn_list.append({"id": uid_counter, "con": con, "addr": addr, "room": -1, "color": None})
             uid_counter += 1
 
-            #is_spec = False
+
             first_available_room = -1
             print("New connection made")
 
@@ -572,13 +552,13 @@ while True:
                 first_available_room = len(room_dict.keys())
                 room_dict[first_available_room] = Board(8, 8)
             conn_list[-1]["room"] = first_available_room
-            #conn_list[-1]["color"]
+
 
 
         print("There are: " + str(conn_ctr + 1) + " current connections")
         print("There are: " + str(len(room_dict)) + "current games going on")
         start_new_thread(make_connection, (con, first_available_room, False))
-        #start_new_thread(Server)
+
 
 
 

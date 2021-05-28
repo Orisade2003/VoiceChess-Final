@@ -33,8 +33,6 @@ class Network(DatagramProtocol):
 
 
     def Encrypt1(self, msg, key):
-        #with open('iv.txt', 'rb') as c_file:
-            #iv = c_file.read(16)
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(key, AES.MODE_CBC, iv)
         chiphertext = cipher.encrypt(pad(msg, AES.block_size))
@@ -43,8 +41,6 @@ class Network(DatagramProtocol):
         return iv + chiphertext
 
     def Decrypt1(self,ciphertext, key):
-        #with open("iv.txt", 'rb') as c_file:
-            #iv = c_file.read(16)
         iv = ciphertext[:16]
         ciphertext = ciphertext[16:]
         cipher = AES.new(key, AES.MODE_CBC, iv)
@@ -114,15 +110,4 @@ class Network(DatagramProtocol):
 
             return info
 
-    """def recv(self, data):
-        try:
-            data = self.client.recv(2048 * 2)
-        except Exception as e:
-            print("Error in game client ", e)
-            exit()
 
-        print(type(data))
-        if type(data) is bytes or type(data) is bytearray:
-            return data.decode()
-        else:
-            return pickle.loads(data)"""
