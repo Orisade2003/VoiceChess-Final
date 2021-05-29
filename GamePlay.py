@@ -109,7 +109,7 @@ class VCClient:
         """
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.target_ip = "localhost" #was 10.100.102.6
+            self.target_ip = "localhost"
             self.target_port = int(port)
             self.voicechat_running = True
             print(self.target_port)
@@ -126,7 +126,7 @@ class VCClient:
             print("Couldn't connect to server")
             print(traceback.print_exc())
 
-        chunk_size = 1024  # 512
+        chunk_size = 1024
         audio_format = pyaudio.paInt16
         channels = 1
         rate = 20000
@@ -173,7 +173,7 @@ class VCClient:
         """
         deletes the instance of the object
         """
-        print("called")
+
         self.voicechat_running = False
         self.recv_thread.join()
         self.send_thread.join()
@@ -457,9 +457,9 @@ def main_logic():
         event_handler(color)
         if cBoard.winner == color:
             if color =="w":
-                end_screen(wind,"White won")
+                end_screen(wind,"White Won!")
             elif color == "b":
-                end_screen(wind,"Black Won")
+                end_screen(wind,"Black Won!")
             try:
                 if pygame.event.get() == pygame.KEYDOWN and pygame.event.get().key == pygame.K_f:
 

@@ -509,7 +509,6 @@ class VCServer:
 
             except socket.error:
                 c.close()
-                print("erorrrr")
                 print(traceback.print_exc())
                 break
 

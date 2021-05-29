@@ -428,7 +428,7 @@ class Queen(Piece):
 
 
 
-             bottom_col -=1
+             #bottom_col -=1
          bottom_col = c - 1
          above_col = c + 1
 
@@ -616,6 +616,7 @@ class Pawn(Piece):
 
 
         return add_moves
+
 
 
 
