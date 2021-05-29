@@ -115,7 +115,6 @@ class VCClient:
             print(self.target_port)
             try:
                 print("port is", type(self.target_port))
-                print(self.target_port)
                 self.s.connect((self.target_ip, self.target_port))
             except Exception as e:
                 print(e)

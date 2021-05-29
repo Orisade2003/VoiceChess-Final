@@ -198,6 +198,16 @@ def make_connection(con, game_num, isSpec = False):
 
 
         SendData(con,serilNum)
+
+        room = -1
+        for c in conn_list:
+            if c["con"] == con:
+                room = c["room"]
+                if room != -1:
+                    voicechat_port = FIRST_VC_PORT + room
+                    if voicechat_port != 8081:
+                        voicechat_port-=1
+                    print("new voice room")
         SendData(con,str(voicechat_port).encode())
         voice_chat_ack = RecvData(con, 1024).decode()
 
