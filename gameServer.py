@@ -205,9 +205,11 @@ def make_connection(con, game_num, isSpec = False):
                 room = c["room"]
                 if room != -1:
                     voicechat_port = FIRST_VC_PORT + room
-                    if voicechat_port != 8081:
-                        voicechat_port-=1
+                    print("voicechat port is now loading nd is ", voicechat_port)
+                    #if voicechat_port != 8081:
+                        #voicechat_port-=1
                     print("new voice room")
+        print("for new con ", voicechat_port)
         SendData(con,str(voicechat_port).encode())
         voice_chat_ack = RecvData(con, 1024).decode()
 
