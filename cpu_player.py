@@ -426,10 +426,24 @@ def draw_game_window(wind, cBoard, p1, p2, color, isReady = True):
 
 
 
-
+import argparse
 wind = None
-name = "Test"
-init_window()
-init_board()
-Globals.init()
-menu(wind,"ori" )
+
+
+def main():
+    """
+    the function is in charge of calling other functions, as well as get the arguments from the launcher
+    """
+    global name
+    parser = argparse.ArgumentParser(description='Process args from launcher')
+    parser.add_argument("username", help="Client Username")
+    parser.add_argument("-ip","--server_ip",action="store" ,help="Server IP")
+    args = parser.parse_args()
+    name = args.username
+    init_window()
+    init_board()
+    Globals.init()
+    pygame.display.set_caption("VoiceChess")
+    menu(wind, name)
+
+main()
